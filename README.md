@@ -53,6 +53,12 @@ Plugins must be enabled under Settings -> Plugins. Enabling them changes the glo
 * Never auto-denies: local pattern matches leave requests for a human to inspect.
 
 
+## Setup diagnosis
+
+If the composer pill says **Needs Setup**, open the popover for the explicit reason and next step. Usually no API key is available to the daemon for the selected provider. Go to **Settings → Plugins → Jev Approver → Credentials**, enter the key and press **Save key** (or configure the daemon environment-variable reference), then reopen the Jev popover. Missing or invalid provider settings are identified separately. Dry Run and recent API failures also show actionable explanations.
+
+**View history** is available from both the composer Jev popover and the plugin Settings screen; opening it from Settings shows all agents, while opening it from an Agent pill filters to that Agent.
+
 ## Jev Composer status and review history
 
 The plugin registers a small **Jev** pill beside each agent's composer using the supported Paseo `addComposerPill` API. Pressing the pill opens a native desktop popover or compact mobile sheet showing the configured provider/model, runtime status and the three most recent decisions for that agent. **Settings** opens the existing Jev Approver settings page. **View all history** opens a paged native plugin screen.
