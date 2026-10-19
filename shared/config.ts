@@ -1,7 +1,7 @@
 import { defineRpc, defineSettings } from "@getpaseo/plugin";
 import { z } from "zod";
 
-export const providerIds = ["zen", "typesafe", "custom"] as const;
+export const providerIds = ["zen", "typesafe", "openrouter", "vercel", "custom"] as const;
 export const approverSettings = defineSettings({
   id: "approver",
   scope: "host",
