@@ -78,7 +78,7 @@ Open **Settings → Plugins → Jev Approver** in a Paseo client connected to th
 
 Paste an API key in the plugin settings and choose **Save key**, or configure the name of an environment variable already exported to the daemon. For Zen, `OPENCODE_API_KEY` is also a fallback; for TypeSafe, `TYPESAFE_API_KEY`. The UI never reads back key values. Key files reside at `${XDG_CONFIG_HOME:-~/.config}/paseo-jev-approver/secrets/<provider>.key` with owner-only permissions on Unix-like hosts. Paseo's ordinary settings store contains provider/model/URL/env-reference only, not raw credentials.
 
-**Approval is double-gated**: keep the Settings **Dry run** switch enabled while testing. To permit auto-approval, turn Dry run off *and* set `JEV_APPROVER_DRY_RUN=false` in the daemon process environment. Either guard remaining active means no automatic approval. Jev errors and unrecognized commands leave the human approval request pending.
+**Approval is controlled by Settings Dry Run only.** Keep it enabled while testing. Turn it off to permit eligible low-risk approvals. Jev errors and unrecognized commands leave human approval pending.
 
 **Important**: settings-based credential storage and the plugin client entry have not yet been compiled against your specific Paseo installation. The repository's CI still covers only `server/review.ts`, not Paseo UI or SDK integration.
 
