@@ -1,5 +1,6 @@
 /** Narrow, fail-closed review policy: it only auto-approves clear, bounded shell commands. */
-type Agent = { id: string; provider: string; cwd: string };\nexport type ReviewConfig = { provider: "zen" | "typesafe" | "custom"; model: string; customEndpoint: string; apiKey?: string };
+type Agent = { id: string; provider: string; cwd: string };
+export type ReviewConfig = { provider: "zen" | "typesafe" | "custom"; model: string; customEndpoint: string; apiKey?: string };
 type Permission = { id: string; kind: string; name: string; title?: string; description?: string; input?: unknown; detail?: unknown };
 type Decision = { action: "allow" | "ask"; reason: string; riskProbability?: number };
 
