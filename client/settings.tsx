@@ -58,10 +58,11 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
       setMessage(t("Complete required model fields"));
       return;
     }
-    const fields = { provider: model.provider, model: model.model.trim(), customEndpoint: model.customEndpoint.trim(), timeoutMs, apiKeyEnv: model.apiKeyEnv.trim() };
+    const snapshot = model;
+    const fields = { provider: snapshot.provider, model: snapshot.model.trim(), customEndpoint: snapshot.customEndpoint.trim(), timeoutMs, apiKeyEnv: snapshot.apiKeyEnv.trim() };
     if (await persist(fields)) {
-      const saved = { ...model, model: fields.model, customEndpoint: fields.customEndpoint, timeout: String(timeoutMs), apiKeyEnv: fields.apiKeyEnv };
-      setModel(saved);
+      const saved = { ...snapshot, model: fields.model, customEndpoint: fields.customEndpoint, timeout: String(timeoutMs), apiKeyEnv: fields.apiKeyEnv };
+      setModel(current => same(current, snapshot) ? saved : current);
       setModelBase(saved);
     }
   }
@@ -71,14 +72,15 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
       setMessage(t("Risk threshold must be between 0% and 100%"));
       return;
     }
-    const prompt = policy.reviewPrompt.trim();
+    const snapshot = policy;
+    const prompt = snapshot.reviewPrompt.trim();
     if (prompt.length < 20 || prompt.length > 8000) {
       setMessage(t("Review prompt must contain 20–8000 characters"));
       return;
     }
     if (await persist({ riskThreshold: n / 100, reviewPrompt: prompt })) {
       const saved = { riskPercent: String(n), reviewPrompt: prompt };
-      setPolicy(saved);
+      setPolicy(current => same(current, snapshot) ? saved : current);
       setPolicyBase(saved);
     }
   }
