@@ -6,9 +6,10 @@
   "scripts": {
     "test": "tsx --test tests/*.test.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "check": "npm run typecheck && npm run i18n:check && npm run plugin:check && npm test",
+    "check": "npm run typecheck && npm run i18n:check && npm run plugin:check && npm run client:syntax && npm test",
     "i18n:check": "node scripts/check-i18n.mjs",
-    "plugin:check": "node scripts/check-plugin-runtime.mjs"
+    "plugin:check": "node scripts/check-plugin-runtime.mjs",
+    "client:syntax": "node scripts/check-client-syntax.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
