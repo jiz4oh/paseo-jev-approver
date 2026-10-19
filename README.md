@@ -53,6 +53,20 @@ Plugins must be enabled under Settings -> Plugins. Enabling them changes the glo
 * Never auto-denies: local pattern matches leave requests for a human to inspect.
 
 
+## Provider configuration
+
+Open **Settings → Plugins → Jev Approver** in a Paseo client connected to the target daemon.
+
+- **OpenCode Zen** (default): `jev-1.13-free`, endpoint `https://opencode.ai/zen/v1/systemone`. Sign up for a Zen key; free model pricing does **not** mean unauthenticated access. Temporary availability may change.
+- **TypeSafe AI**: `jev-1.13`, endpoint `https://api.typesafe.ai/v1/systemone`.
+- **Custom System One**: an explicit HTTPS `/systemone` URL and model identifier. Generic OpenAI, Anthropic, or Gemini Chat APIs are **not** System One endpoints and cannot directly return Jev's typed probability response.
+
+Paste an API key in the plugin settings and choose **Save key**, or configure the name of an environment variable already exported to the daemon. For Zen, `OPENCODE_API_KEY` is also a fallback; for TypeSafe, `TYPESAFE_API_KEY`. The UI never reads back key values. Key files reside at `${XDG_CONFIG_HOME:-~/.config}/paseo-jev-approver/secrets/<provider>.key` with owner-only permissions on Unix-like hosts. Paseo's ordinary settings store contains provider/model/URL/env-reference only, not raw credentials.
+
+**Approval is double-gated**: keep the Settings **Dry run** switch enabled while testing. To permit auto-approval, turn Dry run off *and* set `JEV_APPROVER_DRY_RUN=false` in the daemon process environment. Either guard remaining active means no automatic approval. Jev errors and unrecognized commands leave the human approval request pending.
+
+**Important**: settings-based credential storage and the plugin client entry have not yet been compiled against your specific Paseo installation. The repository's CI still covers only `server/review.ts`, not Paseo UI or SDK integration.
+
 ## Development and CI
 
 The repository runs **offline/mock unit tests** for the Jev permission decision logic; no real TypeSafe API key or Paseo daemon is needed:
