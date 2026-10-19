@@ -114,3 +114,33 @@ test("Custom System One provider must use HTTPS and the correct endpoint", async
   assert.equal((await reviewPermission(agent, request("pwd"), config)).reason, "invalid_endpoint");
   assert.equal((await reviewPermission(agent, request("pwd"), { ...config, customEndpoint: "https://example.com/v1/chat/completions" })).reason, "invalid_systemone_endpoint");
 });
+
+test("OpenRouter uses System One endpoint and OpenRouter model ID", async () => {
+  let called = "";
+  globalThis.fetch = async (url, init) => {
+    called = String(url);
+    assert.equal(JSON.parse(String(init?.body)).model, "jev-1.13");
+    assert.equal((init?.headers as Record<string, string>).Authorization, "Bearer router-test");
+    return { ok: true, status: 200, json: async () => apiRisk(0.005) } as Response;
+  };
+  const result = await reviewPermission(agent, request("pwd"), {
+    provider: "openrouter", model: "jev-1.13", customEndpoint: "", apiKey: "router-test",
+  });
+  assert.equal(called, "https://openrouter.ai/api/v1/systemone");
+  assert.equal(result.action, "allow");
+});
+
+test("Vercel AI Gateway uses TypeSafe-compatible System One API", async () => {
+  let called = "";
+  globalThis.fetch = async (url, init) => {
+    called = String(url);
+    assert.equal(JSON.parse(String(init?.body)).model, "typesafe-ai/jev");
+    assert.equal((init?.headers as Record<string, string>).Authorization, "Bearer vercel-test");
+    return { ok: true, status: 200, json: async () => apiRisk(0.1) } as Response;
+  };
+  const result = await reviewPermission(agent, request("pwd"), {
+    provider: "vercel", model: "typesafe-ai/jev", customEndpoint: "", apiKey: "vercel-test",
+  });
+  assert.equal(called, "https://ai-gateway.vercel.sh/typesafe/v1/systemone");
+  assert.equal(result.action, "ask");
+});
