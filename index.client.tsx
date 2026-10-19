@@ -5,7 +5,8 @@ import { ReviewHistory } from "./client/review-history";
 import { registerJevPills } from "./client/jev-pill";
 
 export default function contribute(client: PluginClientContext) {
-  const Settings = () => createElement(ApproverSettings, {
+  const Settings = (props: any) => createElement(ApproverSettings, {
+    theme: props.theme,
     onOpenHistory: () => client.openScreen({ screenId: "reviews" }),
   });
   const settings = client.addSettingsScreen({ id: "approver", title: "Jev Approver", icon: "ShieldCheck", Component: Settings });
