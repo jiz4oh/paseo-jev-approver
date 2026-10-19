@@ -14,3 +14,9 @@ export function usePluginT() {
   const { i18n } = useTranslation();
   return (key: Key) => translate(i18n.resolvedLanguage ?? i18n.language ?? "en", key);
 }
+
+const outcomeKeys = ["active", "dry_run", "needs_setup", "degraded", "unknown", "approved", "rejected", "denied", "allowed", "blocked", "manual_review"] as const;
+export function tOutcome(outcome: string, t: (key: Key) => string): string {
+  if ((outcomeKeys as readonly string[]).includes(outcome)) return t(outcome as typeof outcomeKeys[number]);
+  return outcome.replace(/_/g, " ");
+}
