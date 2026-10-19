@@ -1,6 +1,6 @@
 /** Narrow, fail-closed review policy: it only auto-approves clear, bounded shell commands. */
 type Agent = { id: string; provider: string; cwd: string };
-export type ReviewConfig = { provider: "zen" | "typesafe" | "openrouter" | "vercel" | "custom"; model: string; customEndpoint: string; apiKey?: string };
+export type ReviewConfig = { provider: "zen" | "typesafe" | "openrouter" | "vercel" | "custom"; model: string; customEndpoint: string; timeoutMs?: number; apiKey?: string };
 type Permission = { id: string; kind: string; name: string; title?: string; description?: string; input?: unknown; detail?: unknown };
 type Decision = { action: "allow" | "ask"; reason: string; riskProbability?: number };
 
@@ -37,7 +37,7 @@ export async function reviewPermission(agent: Agent, req: Permission, config?: R
   }
   const key = config ? config.apiKey : process.env.TYPESAFE_API_KEY;
   if (!key) return { action: "ask", reason: "missing_api_key" };
-  const timeoutMs = Math.max(1000, Math.min(15000, Number(process.env.JEV_APPROVER_TIMEOUT_MS || 6500) || 6500));
+  const timeoutMs = Math.max(1000, Math.min(15000, config?.timeoutMs ?? 6500));
   const endpoint = config?.provider === "zen" ? "https://opencode.ai/zen/v1/systemone"
     : config?.provider === "openrouter" ? "https://openrouter.ai/api/v1/systemone"
     : config?.provider === "vercel" ? "https://ai-gateway.vercel.sh/typesafe/v1/systemone"
@@ -53,7 +53,7 @@ export async function reviewPermission(agent: Agent, req: Permission, config?: R
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     signal: AbortSignal.timeout(timeoutMs),
     body: JSON.stringify({
-      model: config?.model || process.env.JEV_APPROVER_MODEL || "jev-1.13",
+      model: config?.model || "jev-1.13",
       state: {
         tool: req.name,
         command,
