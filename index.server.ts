@@ -23,7 +23,7 @@ export default function contribute(server: PluginServerContext) {
       || (provider === "typesafe" ? process.env.TYPESAFE_API_KEY : undefined)
       || (provider === "openrouter" ? process.env.OPENROUTER_API_KEY : undefined)
       || (provider === "vercel" ? process.env.AI_GATEWAY_API_KEY : undefined);
-    const dryRun = cfg?.dryRun !== false || process.env.JEV_APPROVER_DRY_RUN !== "false";
+    const dryRun = cfg?.dryRun !== false;
     const lastError = (await queryReviews(undefined, 100, 0)).entries.find(e => e.outcome === "failed");
     const recent = lastError && Date.now() - Date.parse(lastError.at) < 15 * 60_000;
     const invalidConfig = !cfg || (provider === "custom" && !cfg.customEndpoint.trim());
@@ -37,7 +37,7 @@ export default function contribute(server: PluginServerContext) {
       ? "Open Settings and finish the provider configuration."
       : !key ? "Open Settings, enter the API key under Credentials, and press Save key. Then reopen this panel."
       : recent ? "Inspect Review history and plugin logs, then check your provider connection."
-      : dryRun ? "Review decisions first. To allow auto-approval, disable Dry Run in Settings and set JEV_APPROVER_DRY_RUN=false in the daemon environment."
+      : dryRun ? "Review decisions first. To allow auto-approval, disable Dry Run in Settings."
       : "Only permission requests surfaced by Paseo can be reviewed.";
     return { provider, model: cfg?.model || "jev-1.13-free", dryRun, detail, nextStep,
       credentialConfigured: Boolean(key), status: invalidConfig || !key ? "needs_setup" as const
@@ -68,7 +68,7 @@ export default function contribute(server: PluginServerContext) {
       console.info(JSON.stringify({ component: "paseo-jev-approver", agent: event.agent.id,
         request: event.request.id, action: decision.action, reason: decision.reason,
         riskProbability: decision.riskProbability, provider: cfg.provider }));
-      const dryRun = cfg.dryRun || process.env.JEV_APPROVER_DRY_RUN !== "false";
+      const dryRun = cfg.dryRun;
       const row = { id: randomUUID(), agentId: event.agent.id, requestId: event.request.id,
         at: new Date().toISOString(), provider: cfg.provider, tool: event.request.name,
         decision: decision.action, outcome: (decision.action !== "allow" ? "pending" : dryRun ? "dry_run" : "pending") as "pending"|"dry_run"|"approved",
