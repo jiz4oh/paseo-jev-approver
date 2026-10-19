@@ -26,8 +26,21 @@ export default function contribute(server: PluginServerContext) {
     const dryRun = cfg?.dryRun !== false || process.env.JEV_APPROVER_DRY_RUN !== "false";
     const lastError = (await queryReviews(undefined, 100, 0)).entries.find(e => e.outcome === "failed");
     const recent = lastError && Date.now() - Date.parse(lastError.at) < 15 * 60_000;
-    return { provider, model: cfg?.model || "jev-1.13-free", dryRun,
-      credentialConfigured: Boolean(key), status: !key ? "needs_setup" as const
+    const invalidConfig = !cfg || (provider === "custom" && !cfg.customEndpoint.trim());
+    const detail = invalidConfig
+      ? "Provider settings are incomplete or invalid."
+      : !key ? "No API key is configured for " + provider + "."
+      : recent ? "A recent review failed; manual approvals remain available."
+      : dryRun ? "Dry Run is enabled; the plugin evaluates but never approves."
+      : "Jev is ready for eligible pending permission requests.";
+    const nextStep = invalidConfig
+      ? "Open Settings and finish the provider configuration."
+      : !key ? "Open Settings, enter the API key under Credentials, and press Save key. Then reopen this panel."
+      : recent ? "Inspect Review history and plugin logs, then check your provider connection."
+      : dryRun ? "Review decisions first. To allow auto-approval, disable Dry Run in Settings and set JEV_APPROVER_DRY_RUN=false in the daemon environment."
+      : "Only permission requests surfaced by Paseo can be reviewed.";
+    return { provider, model: cfg?.model || "jev-1.13-free", dryRun, detail, nextStep,
+      credentialConfigured: Boolean(key), status: invalidConfig || !key ? "needs_setup" as const
         : recent ? "degraded" as const : dryRun ? "dry_run" as const : "active" as const,
       lastFailureAt: lastError?.at || null };
   });
