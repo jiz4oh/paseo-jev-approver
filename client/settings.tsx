@@ -83,7 +83,7 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
     }
     const snapshot = model;
     const fields = { provider: snapshot.provider, model: snapshot.model.trim(), customEndpoint: snapshot.customEndpoint.trim(), timeoutMs, apiKeyEnv: snapshot.apiKeyEnv.trim() };
-    if (await persist(fields)) {
+    if (same(snapshot, modelBase) || await persist(fields)) {
       const saved = { ...snapshot, model: fields.model, customEndpoint: fields.customEndpoint, timeout: String(timeoutMs), apiKeyEnv: fields.apiKeyEnv };
       setModel(current => same(current, snapshot) ? saved : current);
       setModelBase(saved);
