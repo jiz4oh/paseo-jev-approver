@@ -25,7 +25,7 @@ function JevStatusIcon(props: PluginButtonIconProps) {
     : status === "degraded" || status === "needs_setup" ? "#d97706"
     : props.color;
   return <Text accessibilityLabel={"Jev " + status.replace("_", " ")}
-    style={{ color, fontSize: Math.max(16, props.size), lineHeight: Math.max(20, props.size + 3) }}>⬡</Text>;
+    style={{ color, fontSize: Math.max(16, props.size), lineHeight: Math.max(20, props.size + 3) }}>⛨</Text>;
 }
 
 export function registerJevPills(client: PluginClientContext) {
