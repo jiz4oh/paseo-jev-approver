@@ -69,6 +69,13 @@ export default function contribute(server: PluginServerContext) {
     } catch {
       console.warn(JSON.stringify({ component: "paseo-jev-approver",
         agent: event.agent.id, request: event.request.id, action: "ask", reason: "review_failed" }));
+      try {
+        await recordReview({ id: randomUUID(), agentId: event.agent.id, requestId: event.request.id,
+          at: new Date().toISOString(), provider: event.agent.provider, tool: event.request.name,
+          decision: "ask", outcome: "failed", reason: "review_failed", riskProbability: null });
+      } catch {
+        console.warn("Jev audit persistence failed");
+      }
     } finally { inFlight.delete(key); }
   });
   return () => { remove(); inFlight.clear(); };
