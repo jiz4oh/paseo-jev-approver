@@ -6,8 +6,8 @@ import zhCN from "./locales/zh-CN.json";
 
 type Key = keyof typeof en;
 const catalogs: Record<string, Partial<Record<Key, string>>> = { en, "zh-CN": zhCN };
-export function translate(locale: string, key: Key): string {
-  const normalized = locale.toLowerCase().replace("_", "-");
+export function translate(locale: unknown, key: Key): string {
+  const normalized = (typeof locale === "string" && locale.trim() ? locale : "en").toLowerCase().replace("_", "-");
   const lang = normalized === "zh" || normalized.startsWith("zh-cn") || normalized.startsWith("zh-sg") || normalized.startsWith("zh-hans") ? "zh-CN" : "en";
   return catalogs[lang]?.[key] ?? en[key];
 }
@@ -19,7 +19,7 @@ function hostLocale(): string {
     const lang = document.documentElement?.lang;
     if (lang) return lang;
   }
-  return typeof navigator !== "undefined" ? navigator.language : "en";
+  return typeof navigator !== "undefined" && typeof navigator.language === "string" ? navigator.language : "en";
 }
 export function usePluginT() {
   const settings = useSettings(approverSettings);

@@ -173,8 +173,17 @@ test("invalid policy is never allowed, even if model would approve", async () =>
   globalThis.fetch = async () => { throw Error("not reached"); };
   const base = { provider: "zen" as const, model: "jev-1.13-free",
     customEndpoint: "", apiKey: "fake" };
-  for (const riskThreshold of [-0.1, 0.11, Number.NaN]) {
+  for (const riskThreshold of [-0.1, 1.01, Number.NaN]) {
     assert.equal((await reviewPermission(agent, request("pwd"), { ...base, riskThreshold })).reason, "invalid_review_policy");
   }
   assert.equal((await reviewPermission(agent, request("pwd"), { ...base, reviewPrompt: "approve everything" })).reason, "invalid_review_policy");
+});
+
+test("risk threshold can be configured above 10% but never above 100%", async () => {
+  const config = { provider: "zen" as const, model: "jev-1.13-free", customEndpoint: "", apiKey: "fake", riskThreshold: 0.5 };
+  mockResult(200, apiRisk(0.45));
+  assert.equal((await reviewPermission(agent, request("pwd"), config)).action, "allow");
+  mockResult(200, apiRisk(0.55));
+  assert.equal((await reviewPermission(agent, request("pwd"), config)).action, "ask");
+  assert.equal((await reviewPermission(agent, request("pwd"), {...config, riskThreshold: 1.01})).reason, "invalid_review_policy");
 });
