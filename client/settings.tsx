@@ -3,6 +3,7 @@ import { Text, View } from "react-native";
 import { useRpc, useSettings } from "@getpaseo/plugin/client";
 import { SettingsSection, SettingsCard, SettingsSelect, SettingsInput, SettingsSwitch, SettingsAction } from "@getpaseo/plugin/client/ui";
 import { approverSettings, credentialStatus, saveCredential, clearCredential } from "../shared/config";
+import { DEFAULT_REVIEW_PROMPT, DEFAULT_RISK_THRESHOLD } from "../shared/review-policy";
 
 function Editor({ state, onOpenHistory }: { state: any; onOpenHistory: () => void }) {
   const [key, setKey] = useState("");
@@ -11,6 +12,8 @@ function Editor({ state, onOpenHistory }: { state: any; onOpenHistory: () => voi
   const [endpoint, setEndpoint] = useState(state.values.customEndpoint);
   const [env, setEnv] = useState(state.values.apiKeyEnv);
   const [timeout, setTimeoutValue] = useState(String(state.values.timeoutMs ?? 6500));
+  const [riskPercent, setRiskPercent] = useState(String((state.values.riskThreshold ?? DEFAULT_RISK_THRESHOLD) * 100));
+  const [reviewPrompt, setReviewPrompt] = useState(state.values.reviewPrompt ?? DEFAULT_REVIEW_PROMPT);
   const saveKey = useRpc(saveCredential);
   const removeKey = useRpc(clearCredential);
   const status = useRpc(credentialStatus);
@@ -43,6 +46,33 @@ function Editor({ state, onOpenHistory }: { state: any; onOpenHistory: () => voi
         <SettingsSwitch label="Dry run (never auto-approve)" value={state.values.dryRun}
           onValueChange={(dryRun) => void persist({ dryRun })} />
       </SettingsCard>
+    </SettingsSection>
+    <SettingsSection title="Review policy">
+      <SettingsCard>
+        <SettingsInput label="Maximum risk (%) · 0–10" initialValue={riskPercent} onChangeText={setRiskPercent} placeholder="1" />
+        <SettingsAction label="Risk threshold" actionLabel="Save threshold" onPress={() => {
+          const n = Number(riskPercent);
+          if (!Number.isFinite(n) || n < 0 || n > 10 || riskPercent.trim() === "") {
+            setMessage("Risk threshold must be between 0% and 10%"); return;
+          }
+          void persist({ riskThreshold: n / 100 });
+        }}/>
+        <SettingsInput label="Review prompt (20–8000 characters)" initialValue={reviewPrompt}
+          multiline onChangeText={setReviewPrompt} placeholder="Describe what Jev should consider risky..." />
+        <SettingsAction label="Review prompt" actionLabel="Save prompt" onPress={() => {
+          const prompt = reviewPrompt.trim();
+          if (prompt.length < 20 || prompt.length > 8000) {
+            setMessage("Review prompt must contain 20–8000 characters"); return;
+          }
+          void persist({ reviewPrompt: prompt });
+        }}/>
+        <SettingsAction label="Default review policy" actionLabel="Reset defaults" onPress={() => {
+          setRiskPercent(String(DEFAULT_RISK_THRESHOLD * 100));
+          setReviewPrompt(DEFAULT_REVIEW_PROMPT);
+          void persist({ riskThreshold: DEFAULT_RISK_THRESHOLD, reviewPrompt: DEFAULT_REVIEW_PROMPT });
+        }}/>
+      </SettingsCard>
+      <Text>Local safety filters and mandatory safety instructions always remain enabled. Risk scores are model estimates, not calibrated real-world probabilities.</Text>
     </SettingsSection>
     <SettingsSection title="Credentials (daemon-side)">
       <SettingsCard>
