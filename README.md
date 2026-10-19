@@ -1,6 +1,6 @@
 # Paseo Jev Approver (prototype)
 
-A Paseo plugin with a client settings page and daemon-side approval logic. It reviews a narrow class of shell permission requests with TypeSafe Jev System One and only auto-approves when the risk probability is <= 0.01 and `JEV_APPROVER_DRY_RUN=false`.
+A Paseo plugin with a client settings page and daemon-side approval logic. It reviews a narrow class of shell permission requests with TypeSafe Jev System One and only auto-approves when the risk probability is <= 0.01.
 
 ## Installation
 
@@ -32,13 +32,12 @@ Copy `index.server.ts`, `server/review.ts`, and `paseo-plugin.json` from this pa
 ```bash
 npm run typecheck
 export TYPESAFE_API_KEY='YOUR_TYPESAFE_API_KEY'
-export JEV_APPROVER_DRY_RUN=true
 paseo plugin install /absolute/path/to/jev-approver-scaffold
 paseo plugin ls
 paseo plugin logs jev-approver
 ```
 
-Ensure the **daemon process**, not merely your shell, receives `TYPESAFE_API_KEY`, `JEV_APPROVER_DRY_RUN`, and optional `JEV_APPROVER_TIMEOUT_MS`, `JEV_APPROVER_MODEL`. How to supply environment variables depends on how your daemon is launched. Restart/reload the daemon as needed. After inspecting real approval events, set `JEV_APPROVER_DRY_RUN=false` **in the daemon environment**, then reload/restart the plugin.
+Ensure the **daemon process**, not merely your shell, receives `TYPESAFE_API_KEY`, and optional `JEV_APPROVER_TIMEOUT_MS`, `JEV_APPROVER_MODEL`. How to supply environment variables depends on how your daemon is launched. Restart/reload the daemon as needed. After inspecting real approval events, turn off **Dry Run** in Settings.
 
 Plugins must be enabled under Settings -> Plugins. Enabling them changes the global daemon security posture; do so only after reviewing the code. Plugin server code is trusted and unsandboxed.
 
@@ -102,3 +101,7 @@ This is a conservative **prototype**, not a security boundary. A model-derived p
 
 Paseo docs: https://github.com/getpaseo/paseo/blob/main/public-docs/plugins/reference.md
 Jev docs: https://docs.typesafe.ai/
+
+## Dry Run control
+
+The Settings **Dry Run** switch is the sole control for automatic approval. It defaults to enabled on a fresh installation. The legacy `JEV_APPROVER_DRY_RUN` environment variable is ignored. Turning Dry Run off permits the plugin to automatically approve only eligible low-risk permission requests; errors and unsupported operations still require human approval.
