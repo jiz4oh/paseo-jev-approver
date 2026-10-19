@@ -1,6 +1,6 @@
 # Paseo Jev Approver (prototype)
 
-A **server-only** Paseo plugin. It reviews a narrow class of shell permission requests with TypeSafe Jev System One and only auto-approves when the risk probability is <= 0.01 and `JEV_APPROVER_DRY_RUN=false`.
+A Paseo plugin with a client settings page and daemon-side approval logic. It reviews a narrow class of shell permission requests with TypeSafe Jev System One and only auto-approves when the risk probability is <= 0.01 and `JEV_APPROVER_DRY_RUN=false`.
 
 ## Installation
 
@@ -58,7 +58,7 @@ Plugins must be enabled under Settings -> Plugins. Enabling them changes the glo
 Open **Settings → Plugins → Jev Approver** in a Paseo client connected to the target daemon.
 
 - **OpenCode Zen** (default): `jev-1.13-free`, endpoint `https://opencode.ai/zen/v1/systemone`. Sign up for a Zen key; free model pricing does **not** mean unauthenticated access. Temporary availability may change.
-- **TypeSafe AI**: `jev-1.13`, endpoint `https://api.typesafe.ai/v1/systemone`.
+- **OpenRouter**: model \`jev-1.13\`, endpoint \`https://openrouter.ai/api/v1/systemone\`. API key via Settings or \`OPENROUTER_API_KEY\` on the daemon.\n- **Vercel AI Gateway**: model \`typesafe-ai/jev\`, endpoint \`https://ai-gateway.vercel.sh/typesafe/v1/systemone\`. API key via Settings or \`AI_GATEWAY_API_KEY\` on the daemon.\n- **TypeSafe AI**: `jev-1.13`, endpoint `https://api.typesafe.ai/v1/systemone`.
 - **Custom System One**: an explicit HTTPS `/systemone` URL and model identifier. Generic OpenAI, Anthropic, or Gemini Chat APIs are **not** System One endpoints and cannot directly return Jev's typed probability response.
 
 Paste an API key in the plugin settings and choose **Save key**, or configure the name of an environment variable already exported to the daemon. For Zen, `OPENCODE_API_KEY` is also a fallback; for TypeSafe, `TYPESAFE_API_KEY`. The UI never reads back key values. Key files reside at `${XDG_CONFIG_HOME:-~/.config}/paseo-jev-approver/secrets/<provider>.key` with owner-only permissions on Unix-like hosts. Paseo's ordinary settings store contains provider/model/URL/env-reference only, not raw credentials.
