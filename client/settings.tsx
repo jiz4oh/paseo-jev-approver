@@ -26,6 +26,13 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
     setMessage(ok ? t("Saved") : t("Save failed; reload and retry"));
   }
   return <View style={{ gap: 20, paddingBottom: 24 }}>
+    <SettingsSection title={t("Interface language")}>
+      <SettingsCard>
+        <SettingsSelect label={t("Language")} value={state.values.language ?? "auto"}
+          options={[{ label: t("Automatic"), value: "auto" }, { label: t("English"), value: "en" }, { label: t("Simplified Chinese"), value: "zh-CN" }]}
+          onValueChange={(language) => void persist({ language })}/>
+      </SettingsCard>
+    </SettingsSection>
     <SettingsSection title={t("Review history")}>
       <SettingsCard>
         <SettingsAction label={t("Approval records")} actionLabel={t("View history")} onPress={onOpenHistory}/>
