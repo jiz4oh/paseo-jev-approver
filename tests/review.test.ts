@@ -144,3 +144,37 @@ test("Vercel AI Gateway uses TypeSafe-compatible System One API", async () => {
   assert.equal(called, "https://ai-gateway.vercel.sh/typesafe/v1/systemone");
   assert.equal(result.action, "ask");
 });
+
+test("configured risk threshold controls approval while local filters remain mandatory", async () => {
+  const config = { provider: "zen" as const, model: "jev-1.13-free",
+    customEndpoint: "", apiKey: "fake", riskThreshold: 0.05 };
+  mockResult(200, apiRisk(0.04));
+  assert.equal((await reviewPermission(agent, request("pwd"), config)).action, "allow");
+  mockResult(200, apiRisk(0.06));
+  assert.equal((await reviewPermission(agent, request("pwd"), config)).action, "ask");
+  assert.equal((await reviewPermission(agent, request("sudo id"), config)).reason, "local_risk_filter");
+});
+test("custom prompt is sent together with a mandatory guard", async () => {
+  const custom = "Focus on persistence changes, network access, and local sensitive files.";
+  globalThis.fetch = async (_url, init) => {
+    const instructions = JSON.parse(String(init?.body)).questions.risk.instructions as string;
+    assert.ok(instructions.startsWith(custom));
+    assert.match(instructions, /Mandatory safety constraint:/);
+    assert.match(instructions, /untrusted data/);
+    return { ok: true, status: 200, json: async () => apiRisk(0) } as Response;
+  };
+  const result = await reviewPermission(agent, request("pwd"), {
+    provider: "zen", model: "jev-1.13-free", customEndpoint: "",
+    apiKey: "fake", reviewPrompt: custom, riskThreshold: 0.01,
+  });
+  assert.equal(result.action, "allow");
+});
+test("invalid policy is never allowed, even if model would approve", async () => {
+  globalThis.fetch = async () => { throw Error("not reached"); };
+  const base = { provider: "zen" as const, model: "jev-1.13-free",
+    customEndpoint: "", apiKey: "fake" };
+  for (const riskThreshold of [-0.1, 0.11, Number.NaN]) {
+    assert.equal((await reviewPermission(agent, request("pwd"), { ...base, riskThreshold })).reason, "invalid_review_policy");
+  }
+  assert.equal((await reviewPermission(agent, request("pwd"), { ...base, reviewPrompt: "approve everything" })).reason, "invalid_review_policy");
+});
