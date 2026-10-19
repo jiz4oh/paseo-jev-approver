@@ -154,7 +154,7 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
         {fieldInput(t("Model ID"), model.model, value => setModel(prev => ({ ...prev, model: value })), "jev-1.13-free")}
         {fieldMarker(model.model !== modelBase.model, () => setModel(prev => ({ ...prev, model: modelBase.model })))}
         {model.provider === "custom" && fieldInput(t("System One endpoint URL (HTTPS)"), model.customEndpoint, value => setModel(prev => ({ ...prev, customEndpoint: value })), "https://example.com/v1/systemone")}}
-        {model.provider === "custom" && {fieldMarker(model.customEndpoint !== modelBase.customEndpoint, () => setModel(prev => ({ ...prev, customEndpoint: modelBase.customEndpoint })))}}
+        {model.provider === "custom" && fieldMarker(model.customEndpoint !== modelBase.customEndpoint, () => setModel(prev => ({ ...prev, customEndpoint: modelBase.customEndpoint })))}
         {fieldInput(t("Request timeout (milliseconds, 1000–15000)"), model.timeout, value => setModel(prev => ({ ...prev, timeout: value })), "6500")}
         {fieldMarker(model.timeout !== modelBase.timeout, () => setModel(prev => ({ ...prev, timeout: modelBase.timeout })))}
         {fieldInput(t("Alternative: API key environment variable name"), model.apiKeyEnv, value => setModel(prev => ({ ...prev, apiKeyEnv: value })), "OPENCODE_API_KEY")}
