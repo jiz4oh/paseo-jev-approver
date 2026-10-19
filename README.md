@@ -1,6 +1,6 @@
 # Paseo Jev Approver (prototype)
 
-A Paseo plugin with a client settings page and daemon-side approval logic. It reviews a narrow class of shell permission requests with TypeSafe Jev System One and only auto-approves when the risk probability is <= 0.01.
+A Paseo plugin with a client settings page and daemon-side approval logic. It reviews a narrow class of shell permission requests with TypeSafe Jev System One and only auto-approves when the returned Jev risk score does not exceed the Settings threshold (default 0.01).
 
 ## Installation
 
@@ -111,3 +111,14 @@ The Settings **Dry Run** switch is the sole control for automatic approval. It d
 The provider model and API request timeout (1,000–15,000 ms, default 6,500 ms) are configured in **Settings → Plugins → Jev Approver**. Legacy `JEV_APPROVER_TIMEOUT_MS` and `JEV_APPROVER_MODEL` variables are ignored by the live review path. Provider key environment variables and XDG standard directory variables remain available.
 
 The Composer Jev icon is now status-aware: green when active, muted in dry run, amber when setup is missing or review failures occur. Its status is refreshed periodically while the composer is mounted. A green icon means the reviewer is configured for eligible pending permissions, not that every tool call is intercepted.
+
+## Review Policy settings
+
+Open **Settings → Plugins → Jev Approver → Review policy**.
+
+- **Maximum risk (%)**: default 1%, allowed 0–10%. This compares against the Jev numeric risk score, which is **not a calibrated likelihood of harm**. A lower threshold is more restrictive.
+- **Review prompt**: 20–8000 characters, initially the built-in conservative prompt. Saving changes the instructions sent for subsequent requests.
+- **Reset defaults**: restores the 1% threshold and built-in prompt together.
+- Local shell risk filters and mandatory untrusted-input safety instructions remain in force irrespective of custom prompts.
+
+Existing installations receive the policy defaults through schema defaults without erasing provider, key reference, timeout, or Dry Run preferences. Review changes in Dry Run first; enabling real auto-approval is your responsibility. The client UI and complete Paseo integration are not yet covered by the repository's lightweight unit-test CI.
