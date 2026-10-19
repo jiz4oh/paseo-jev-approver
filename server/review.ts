@@ -1,4 +1,4 @@
-import { DEFAULT_RISK_THRESHOLD, DEFAULT_REVIEW_PROMPT, MANDATORY_REVIEW_GUARD, MAX_RISK_THRESHOLD } from "../shared/review-policy";
+import { DEFAULT_RISK_THRESHOLD, DEFAULT_REVIEW_PROMPT, MANDATORY_REVIEW_GUARD, MAX_RISK_THRESHOLD } from "../shared/review-policy.js";
 /** Narrow, fail-closed review policy: it only auto-approves clear, bounded shell commands. */
 type Agent = { id: string; provider: string; cwd: string };
 export type ReviewConfig = { provider: "zen" | "typesafe" | "openrouter" | "vercel" | "custom"; model: string; customEndpoint: string; timeoutMs?: number; riskThreshold?: number; reviewPrompt?: string; apiKey?: string };
