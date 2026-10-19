@@ -4,7 +4,7 @@ import { useRpc, useSettings } from "@getpaseo/plugin/client";
 import { SettingsSection, SettingsCard, SettingsSelect, SettingsInput, SettingsSwitch, SettingsAction } from "@getpaseo/plugin/client/ui";
 import { approverSettings, credentialStatus, saveCredential, clearCredential } from "../shared/config";
 
-function Editor({ state }: { state: Extract<ReturnType<typeof useSettings<typeof approverSettings>>, { status: "ready" }> }) {
+function Editor({ state }: { state: any }) {
   const [key, setKey] = useState("");
   const [message, setMessage] = useState("");
   const [model, setModel] = useState(state.values.model);
@@ -56,7 +56,7 @@ function Editor({ state }: { state: Extract<ReturnType<typeof useSettings<typeof
       </SettingsCard>
     </SettingsSection>
     <Text>{hasKey === null ? "" : hasKey ? "Key configured" : "No stored key"}</Text>
-    <Text>{message || state.saveError?.message || ""}</Text>
+    <Text>{message || String(state.saveError ?? "") || ""}</Text>
   </View>;
 }
 
