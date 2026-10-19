@@ -31,8 +31,8 @@ export default function contribute(server: PluginServerContext) {
         : recent ? "degraded" as const : dryRun ? "dry_run" as const : "active" as const,
       lastFailureAt: lastError?.at || null };
   });
-  server.on("agent.permission_resolved", async ({ agent, requestId, response }) => {
-    await resolveReview(agent.id, requestId, response.behavior === "allow" ? "resolved_allow" : "resolved_deny");
+  server.on("agent.permission_resolved", async ({ agent, requestId, resolution }) => {
+    await resolveReview(agent.id, requestId, resolution.behavior === "allow" ? "resolved_allow" : "resolved_deny");
   });
   const inFlight = new Set<string>();
   const remove = server.on("agent.permission_requested", async (event, context) => {
