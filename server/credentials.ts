@@ -9,6 +9,7 @@ const secretFile = (provider: ProviderId) => join(dir, provider + ".key");
 export async function saveApiKey(provider: ProviderId, apiKey: string) {
   await mkdir(dir, { recursive: true, mode: 0o700 });
   await writeFile(secretFile(provider), apiKey.trim() + "\n", { encoding: "utf8", mode: 0o600, flag: "w" });
+  await chmod(secretFile(provider), 0o600);
   return { saved: true };
 }
 export async function clearApiKey(provider: ProviderId) {
