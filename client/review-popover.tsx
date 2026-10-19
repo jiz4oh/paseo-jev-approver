@@ -26,7 +26,15 @@ export function createReviewPopover(openSettings: () => void, openHistory: (agen
       <Text style={{ color: colors.foregroundMuted }}>
         {error ? "Unable to read daemon status" : status ? status.status.replace("_", " ").toUpperCase() : "Loading…"}
       </Text>
-      {status && <Text style={{ color: colors.foregroundMuted }}>{status.provider} · {status.model}</Text>}
+      {status && <>
+        <Text style={{ color: colors.foregroundMuted }}>{status.provider} · {status.model}</Text>
+        <Text style={{ color: colors.foreground }}>{status.detail}</Text>
+        <Text style={{ color: colors.foregroundMuted }}>{status.nextStep}</Text>
+        {status.status === "needs_setup" && <Pressable accessibilityRole="button"
+          onPress={() => { props.close(); openSettings(); }}>
+          <Text style={{ color: colors.accent || colors.foreground }}>Configure API key →</Text>
+        </Pressable>}
+      </>}
       <Text style={{ fontWeight: "600", color: colors.foreground }}>Recent reviews</Text>
       {entries.length === 0 && <Text style={{ color: colors.foregroundMuted }}>No reviews yet</Text>}
       {entries.map(entry => <View key={entry.id} style={{ gap: 2 }}>
