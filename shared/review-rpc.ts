@@ -19,6 +19,6 @@ export const getReviewStatus = defineRpc({
   output: z.object({
     provider: z.string(), model: z.string(), dryRun: z.boolean(),
     credentialConfigured: z.boolean(), status: z.enum(["active","dry_run","needs_setup","degraded"]),
-    lastFailureAt: z.string().nullable(),
+    lastFailureAt: z.string().nullable(), detail: z.string(), nextStep: z.string(),
   }),
 });
