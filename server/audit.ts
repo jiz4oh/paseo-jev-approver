@@ -1,7 +1,13 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { homedir } from "node:os";
-import type { AuditEntry } from "../shared/review-rpc";
+// Keep the storage DTO independent of the Paseo SDK so it can be tested in isolation.
+export interface AuditEntry {
+  id: string; agentId: string; requestId: string; at: string;
+  provider: string; tool: string; decision: "allow" | "ask";
+  outcome: "approved" | "pending" | "dry_run" | "failed" | "resolved_allow" | "resolved_deny";
+  reason: string; riskProbability: number | null;
+}
 
 const directory = join(process.env.XDG_STATE_HOME || join(homedir(), ".local/state"), "paseo-jev-approver");
 const path = join(directory, "reviews.json");
