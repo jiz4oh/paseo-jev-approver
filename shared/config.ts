@@ -13,6 +13,7 @@ export const approverSettings = defineSettings({
     customName: z.string().default("Custom System One"),
     apiKeyEnv: z.string().default(""),
     dryRun: z.boolean().default(true),
+    timeoutMs: z.number().int().min(1000).max(15000).default(6500),
   }),
 });
 
