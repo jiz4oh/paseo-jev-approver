@@ -82,5 +82,10 @@
   "English": "English",
   "Simplified Chinese": "Simplified Chinese",
   "Maximum risk (%) · 0–100": "Maximum risk (%) · 0–100",
-  "Risk threshold must be between 0% and 100%": "Risk threshold must be between 0% and 100%"
+  "Risk threshold must be between 0% and 100%": "Risk threshold must be between 0% and 100%",
+  "General": "General",
+  "Complete required model fields": "Complete required model fields",
+  "Unsaved changes": "Unsaved changes — save this tab before leaving",
+  "Saving…": "Saving…",
+  "Save changes": "Save changes"
 }

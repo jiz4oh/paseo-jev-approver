@@ -82,5 +82,10 @@
   "English": "英语",
   "Simplified Chinese": "简体中文",
   "Maximum risk (%) · 0–100": "最大风险（%）· 0–100",
-  "Risk threshold must be between 0% and 100%": "风险阈值必须在 0%–100% 之间"
+  "Risk threshold must be between 0% and 100%": "风险阈值必须在 0%–100% 之间",
+  "General": "常规",
+  "Complete required model fields": "请填写必要的模型配置",
+  "Unsaved changes": "有未保存的修改，请保存当前标签页",
+  "Saving…": "正在保存……",
+  "Save changes": "保存修改"
 }
