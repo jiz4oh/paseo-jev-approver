@@ -4,7 +4,7 @@ import { useRpc, useSettings } from "@getpaseo/plugin/client";
 import { SettingsSection, SettingsCard, SettingsSelect, SettingsInput, SettingsSwitch, SettingsAction } from "@getpaseo/plugin/client/ui";
 import { approverSettings, credentialStatus, saveCredential, clearCredential } from "../shared/config";
 
-function Editor({ state }: { state: any }) {
+function Editor({ state, onOpenHistory }: { state: any; onOpenHistory: () => void }) {
   const [key, setKey] = useState("");
   const [message, setMessage] = useState("");
   const [model, setModel] = useState(state.values.model);
@@ -20,6 +20,11 @@ function Editor({ state }: { state: any }) {
     setMessage(ok ? "Saved" : "Save failed; reload and retry");
   }
   return <View>
+    <SettingsSection title="Review history">
+      <SettingsCard>
+        <SettingsAction label="Approval records" actionLabel="View history" onPress={onOpenHistory}/>
+      </SettingsCard>
+    </SettingsSection>
     <SettingsSection title="Jev provider">
       <SettingsCard>
         <SettingsSelect label="Provider" value={provider}
@@ -60,8 +65,8 @@ function Editor({ state }: { state: any }) {
   </View>;
 }
 
-export function ApproverSettings() {
+export function ApproverSettings({ onOpenHistory }: { onOpenHistory: () => void }) {
   const state = useSettings(approverSettings);
   if (state.status !== "ready") return <Text>Settings: {state.status}. Reload or reset if invalid.</Text>;
-  return <Editor key={state.values.provider} state={state}/>;
+  return <Editor key={state.values.provider} state={state} onOpenHistory={onOpenHistory}/>;
 }
