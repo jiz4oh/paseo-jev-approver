@@ -23,9 +23,12 @@ export function createReviewPopover(openSettings: () => void, openHistory: (agen
       return () => { live = false; };
     }, [agentId]);
     const colors = props.theme.colors;
+    const statusColor = status?.status === "active" ? "#16a34a"
+      : status?.status === "degraded" || status?.status === "needs_setup" ? "#d97706"
+      : colors.foregroundMuted;
     return <View style={{ gap: 12, padding: 8, minWidth: 260 }}>
       <Text style={{ fontWeight: "600", color: colors.foreground }}>{t("Jev Approver")}</Text>
-      <Text style={{ color: colors.foregroundMuted }}>
+      <Text style={{ color: error ? colors.foregroundMuted : statusColor, fontWeight: status ? "600" : "400" }}>
         {error ? t("Unable to read daemon status") : status ? tOutcome(status.status,t) : t("Loading…")}
       </Text>
       {status && <>
