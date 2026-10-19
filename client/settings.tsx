@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View, TextInput, Pressable, ScrollView } from "react-native";
 import { useRpc, useSettings } from "@getpaseo/plugin/client";
 import { SettingsSection, SettingsCard, SettingsSelect, SettingsInput, SettingsSwitch, SettingsAction, SettingsRow } from "@getpaseo/plugin/client/ui";
@@ -25,11 +25,40 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
   const [message, setMessage] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [hasKey, setHasKey] = useState<boolean | null>(null);
+  const [keyBusy, setKeyBusy] = useState(false);
   const saveKey = useRpc(saveCredential);
   const removeKey = useRpc(clearCredential);
   const keyStatus = useRpc(credentialStatus);
   const modelDirty = !same(model, modelBase);
   const policyDirty = !same(policy, policyBase);
+  useEffect(() => {
+    let mounted = true;
+    setHasKey(null);
+    void keyStatus({ provider: model.provider }).then(result => { if (mounted) setHasKey(result.configured); })
+      .catch(() => { if (mounted) setHasKey(null); });
+    return () => { mounted = false; };
+  }, [model.provider]);
+  async function commitKey() {
+    const value = apiKey.trim();
+    if (!value || keyBusy) return;
+    setKeyBusy(true);
+    try {
+      await saveKey({ provider: model.provider, apiKey: value });
+      setApiKey("");
+      setHasKey(true);
+      setMessage(t("Credential saved on daemon"));
+    } catch { setMessage(t("Credential save failed")); }
+    finally { setKeyBusy(false); }
+  }
+  function fieldMarker(changed: boolean, reset: () => void) {
+    if (!changed) return null;
+    return <View style={{ flexDirection: "row", justifyContent: "flex-end", alignItems: "center", gap: 12, paddingHorizontal: 12, paddingVertical: 5 }}>
+      <Text style={{ color: "#d97706", fontSize: 12 }}>{t("Modified")}</Text>
+      <Pressable accessibilityRole="button" onPress={reset}>
+        <Text style={{ color: colors.accent || colors.foreground, fontSize: 12 }}>{t("Undo")}</Text>
+      </Pressable>
+    </View>;
+  }
 
   async function persist(fields: Record<string, unknown>) {
     if (saving) return false;
@@ -116,31 +145,40 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
         <SettingsSelect label={t("Provider")} value={model.provider}
           options={[{ label:t("OpenCode Zen (default)"), value:"zen" },{ label:t("TypeSafe AI"),value:"typesafe" },{ label:t("OpenRouter"),value:"openrouter" },{ label:t("Vercel AI Gateway"),value:"vercel" },{ label:t("Custom System One"),value:"custom" }]}
           onValueChange={provider => setModel(prev => ({ ...prev, provider, model: suggestedModel(provider) }))}/>
+        {fieldMarker(model.provider !== modelBase.provider, () => setModel(prev => ({ ...prev, provider: modelBase.provider })))}
         <SettingsInput label={t("Model ID")} initialValue={model.model} onChangeText={value => setModel(prev => ({ ...prev, model: value }))} placeholder="jev-1.13-free"/>
+        {fieldMarker(model.model !== modelBase.model, () => setModel(prev => ({ ...prev, model: modelBase.model })))}
         {model.provider === "custom" && <SettingsInput label={t("System One endpoint URL (HTTPS)")}
           initialValue={model.customEndpoint} onChangeText={value => setModel(prev => ({ ...prev, customEndpoint: value }))} placeholder="https://example.com/v1/systemone"/>}
+        {model.provider === "custom" && {fieldMarker(model.customEndpoint !== modelBase.customEndpoint, () => setModel(prev => ({ ...prev, customEndpoint: modelBase.customEndpoint })))}}
         <SettingsInput label={t("Request timeout (milliseconds, 1000–15000)")}
           initialValue={model.timeout} onChangeText={value => setModel(prev => ({ ...prev, timeout: value }))} placeholder="6500"/>
+        {fieldMarker(model.timeout !== modelBase.timeout, () => setModel(prev => ({ ...prev, timeout: modelBase.timeout })))}
         <SettingsInput label={t("Alternative: API key environment variable name")}
           initialValue={model.apiKeyEnv} onChangeText={value => setModel(prev => ({ ...prev, apiKeyEnv: value }))} placeholder="OPENCODE_API_KEY"/>
+        {fieldMarker(model.apiKeyEnv !== modelBase.apiKeyEnv, () => setModel(prev => ({ ...prev, apiKeyEnv: modelBase.apiKeyEnv })))}
       </SettingsCard></SettingsSection>
       <SettingsSection title={t("Credentials (daemon-side)")}><SettingsCard>
-        <SettingsInput label={t("API key")} placeholder={t("Paste key (not shown after saving)")} secureTextEntry onChangeText={setApiKey}/>
-        <SettingsAction label={t("API key")} actionLabel={t("Save key")} onPress={() => {
-          void saveKey({ provider: model.provider, apiKey }).then(() => { setApiKey(""); setHasKey(true); setMessage(t("Credential saved on daemon")); })
-            .catch(() => setMessage(t("Credential save failed")));
-        }}/>
-        <SettingsAction label={t("Existing credential")} actionLabel={t("Check status")}
-          onPress={() => { void keyStatus({ provider: model.provider }).then(result => setHasKey(result.configured)).catch(() => setMessage(t("Status check failed"))); }}/>
-        <SettingsAction label={t("Remove credential")} actionLabel={t("Delete key")}
-          onPress={() => { void removeKey({ provider: model.provider }).then(() => { setHasKey(false); setMessage(t("Credential removed")); }).catch(() => setMessage(t("Delete failed"))); }}/>
+        <SettingsRow label={t("API key")} hint={t("Key is saved to daemon when editing finishes.")}>
+          <TextInput secureTextEntry value={apiKey} onChangeText={setApiKey}
+            onBlur={() => { void commitKey(); }} onSubmitEditing={() => { void commitKey(); }}
+            placeholder={t("Paste key (not shown after saving)")}
+            accessibilityLabel={t("API key")}
+            style={{ color: colors.foreground, backgroundColor: colors.control, padding: 10, borderRadius: 8, minWidth: 180, borderColor: colors.border, borderWidth: 1 }}/>
+        </SettingsRow>
+        <SettingsRow label={t("Stored key status")}>
+          <Text style={{ color: colors.foregroundMuted }}>{hasKey === null ? t("Checking…") : hasKey ? t("Key configured") : t("No stored key")}</Text>
+        </SettingsRow>
+        {hasKey === true && <SettingsAction label={t("Remove credential")} actionLabel={t("Delete stored key")}
+          onPress={() => { void removeKey({ provider: model.provider }).then(() => { setHasKey(false); setMessage(t("Credential removed")); }).catch(() => setMessage(t("Delete failed"))); }}/>}
       </SettingsCard></SettingsSection>
-      {hasKey !== null && <Text style={{ color: colors.foregroundMuted }}>{hasKey ? t("Key configured") : t("No stored key")}</Text>}
+      <Text style={{ color: colors.foregroundMuted, fontSize: 12 }}>{t("Stored credentials are separate from environment variable keys.")}</Text>
     </>}
     {tab === "policy" && <>
       <SettingsSection title={t("Review policy")}><SettingsCard>
         <SettingsInput label={t("Maximum risk (%) · 0–100")} initialValue={policy.riskPercent}
           onChangeText={value => setPolicy(prev => ({ ...prev, riskPercent: value }))} placeholder="1"/>
+        {fieldMarker(policy.riskPercent !== policyBase.riskPercent, () => setPolicy(prev => ({ ...prev, riskPercent: policyBase.riskPercent })))}
       </SettingsCard></SettingsSection>
       <Text style={{ color: colors.foreground }}>{t("Review prompt (20–8000 characters)")}</Text>
       <TextInput multiline numberOfLines={8} value={policy.reviewPrompt}
@@ -148,6 +186,7 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
         accessibilityLabel={t("Review prompt")} placeholder={t("Describe what Jev should consider risky...")}
         style={{ minHeight: 180, width: "100%", color: colors.foreground, backgroundColor: colors.control,
           textAlignVertical: "top", padding: 12, borderWidth: 1, borderColor: colors.border, borderRadius: 10 }}/>
+      {fieldMarker(policy.reviewPrompt !== policyBase.reviewPrompt, () => setPolicy(prev => ({ ...prev, reviewPrompt: policyBase.reviewPrompt })))}
       <Pressable accessibilityRole="button" onPress={() => setPolicy({ riskPercent: String(DEFAULT_RISK_THRESHOLD * 100), reviewPrompt: DEFAULT_REVIEW_PROMPT })}>
         <Text style={{ color: colors.accent || colors.foreground }}>{t("Reset defaults")}</Text>
       </Pressable>
