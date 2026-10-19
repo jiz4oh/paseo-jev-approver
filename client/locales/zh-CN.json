@@ -87,5 +87,12 @@
   "Complete required model fields": "请填写必要的模型配置",
   "Unsaved changes": "有未保存的修改，请保存当前标签页",
   "Saving…": "正在保存……",
-  "Save changes": "保存修改"
+  "Save changes": "保存修改",
+  "Modified": "已修改",
+  "Undo": "撤销",
+  "Stored key status": "已存储密钥状态",
+  "Checking…": "检查中……",
+  "Delete stored key": "删除已存储密钥",
+  "Key is saved to daemon when editing finishes.": "输入结束后将密钥保存到守护进程。",
+  "Stored credentials are separate from environment variable keys.": "本地存储的密钥与环境变量中的密钥相互独立。"
 }
