@@ -86,9 +86,31 @@ test("Jev receives the command and uses a bounded timeout", async () => {
     assert.equal((init?.headers as Record<string, string>).Authorization, "Bearer testing-only");
     const body = JSON.parse(String(init?.body));
     assert.equal(body.state.command, "pwd");
-    assert.equal(body.model, "jev-1.13.0");
+    assert.equal(body.model, "jev-1.13");
     assert.ok(init?.signal);
     return { ok: true, status: 200, json: async () => apiRisk(0) } as Response;
   };
   assert.equal((await reviewPermission(agent, request("pwd"))).action, "allow");
+});
+
+test("OpenCode Zen free is routed to its System One endpoint", async () => {
+  process.env.TYPESAFE_API_KEY = "unused";
+  let called = "";
+  globalThis.fetch = async (url, init) => {
+    called = String(url);
+    const body = JSON.parse(String(init?.body));
+    assert.equal(body.model, "jev-1.13-free");
+    assert.equal((init?.headers as Record<string,string>).Authorization, "Bearer zen-test");
+    return { ok: true, status: 200, json: async () => apiRisk(0) } as Response;
+  };
+  const outcome = await reviewPermission(agent, request("pwd"), {
+    provider: "zen", model: "jev-1.13-free", customEndpoint: "", apiKey: "zen-test"
+  });
+  assert.equal(outcome.action, "allow");
+  assert.equal(called, "https://opencode.ai/zen/v1/systemone");
+});
+test("Custom System One provider must use HTTPS and the correct endpoint", async () => {
+  const config = { provider: "custom" as const, model: "jev-custom", customEndpoint: "http://localhost/v1/systemone", apiKey: "x" };
+  assert.equal((await reviewPermission(agent, request("pwd"), config)).reason, "invalid_endpoint");
+  assert.equal((await reviewPermission(agent, request("pwd"), { ...config, customEndpoint: "https://example.com/v1/chat/completions" })).reason, "invalid_systemone_endpoint");
 });
