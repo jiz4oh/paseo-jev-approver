@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { Text, View, TextInput } from "react-native";
 import { useRpc, useSettings } from "@getpaseo/plugin/client";
 import { SettingsSection, SettingsCard, SettingsSelect, SettingsInput, SettingsSwitch, SettingsAction } from "@getpaseo/plugin/client/ui";
 import { approverSettings, credentialStatus, saveCredential, clearCredential } from "../shared/config";
@@ -57,8 +57,11 @@ function Editor({ state, onOpenHistory }: { state: any; onOpenHistory: () => voi
           }
           void persist({ riskThreshold: n / 100 });
         }}/>
-        <SettingsInput label="Review prompt (20–8000 characters)" initialValue={reviewPrompt}
-          multiline onChangeText={setReviewPrompt} placeholder="Describe what Jev should consider risky..." />
+        <Text>Review prompt (20–8000 characters)</Text>
+        <TextInput multiline numberOfLines={6} value={reviewPrompt}
+          onChangeText={setReviewPrompt} accessibilityLabel="Review prompt"
+          placeholder="Describe what Jev should consider risky..."
+          style={{ minHeight: 120, textAlignVertical: "top", padding: 12, borderWidth: 1, borderColor: "#999", borderRadius: 8 }} />
         <SettingsAction label="Review prompt" actionLabel="Save prompt" onPress={() => {
           const prompt = reviewPrompt.trim();
           if (prompt.length < 20 || prompt.length > 8000) {
