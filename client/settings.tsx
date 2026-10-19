@@ -10,6 +10,7 @@ function Editor({ state, onOpenHistory }: { state: any; onOpenHistory: () => voi
   const [model, setModel] = useState(state.values.model);
   const [endpoint, setEndpoint] = useState(state.values.customEndpoint);
   const [env, setEnv] = useState(state.values.apiKeyEnv);
+  const [timeout, setTimeoutValue] = useState(String(state.values.timeoutMs ?? 6500));
   const saveKey = useRpc(saveCredential);
   const removeKey = useRpc(clearCredential);
   const status = useRpc(credentialStatus);
@@ -37,6 +38,8 @@ function Editor({ state, onOpenHistory }: { state: any; onOpenHistory: () => voi
             placeholder="https://example.com/v1/systemone" />
           <SettingsAction label="Endpoint" actionLabel="Save endpoint" onPress={() => void persist({ customEndpoint: endpoint })}/>
         </> : null}
+        <SettingsInput label="Request timeout (milliseconds, 1000–15000)" initialValue={timeout} onChangeText={setTimeoutValue} placeholder="6500" />
+        <SettingsAction label="Timeout" actionLabel="Save timeout" onPress={() => { const n = Number(timeout); if (!Number.isInteger(n) || n < 1000 || n > 15000) { setMessage("Timeout must be between 1000 and 15000 ms"); return; } void persist({ timeoutMs: n }); }}/>
         <SettingsSwitch label="Dry run (never auto-approve)" value={state.values.dryRun}
           onValueChange={(dryRun) => void persist({ dryRun })} />
       </SettingsCard>
