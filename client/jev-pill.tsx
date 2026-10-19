@@ -1,6 +1,6 @@
 import type { PluginClientContext, PluginButtonRegistration } from "@getpaseo/plugin/client";
 import { useEffect, useState } from "react";
-import { Text } from "react-native";
+import { Text, View } from "react-native";
 import { useRpc } from "@getpaseo/plugin/client";
 import type { PluginButtonIconProps } from "@getpaseo/plugin/client";
 import { getReviewStatus } from "../shared/review-rpc";
@@ -24,8 +24,18 @@ function JevStatusIcon(props: PluginButtonIconProps) {
   const color = status === "active" ? "#16a34a"
     : status === "degraded" || status === "needs_setup" ? "#d97706"
     : props.color;
-  return <Text accessibilityLabel={"Jev " + status.replace("_", " ")}
-    style={{ color, fontSize: Math.max(16, props.size), lineHeight: Math.max(20, props.size + 3) }}>⛨</Text>;
+  // U+26E8 is often drawn as a colored emoji and ignores Text.color.
+  // Use primitive RN views for a consistently tintable monochrome icon.
+  const size = Math.max(16, props.size);
+  return <View accessibilityLabel={"Jev " + status.replace("_", " ")}
+    style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
+    <View style={{ width: size * 0.72, height: size * 0.78, borderWidth: Math.max(1.5, size * 0.09),
+      borderColor: color, borderTopLeftRadius: size * 0.13, borderTopRightRadius: size * 0.13,
+      borderBottomLeftRadius: size * 0.3, borderBottomRightRadius: size * 0.3,
+      alignItems: "center", justifyContent: "center" }}>
+      <Text style={{ color, fontSize: size * 0.48, lineHeight: size * 0.59, fontWeight: "700" }}>+</Text>
+    </View>
+  </View>;
 }
 
 export function registerJevPills(client: PluginClientContext) {
