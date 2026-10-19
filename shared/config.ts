@@ -9,6 +9,7 @@ export const approverSettings = defineSettings({
   version: 1,
   schema: z.object({
     provider: z.enum(providerIds).default("zen"),
+    language: z.enum(["auto", "en", "zh-CN"]).default("auto"),
     model: z.string().min(1).default("jev-1.13-free"),
     customEndpoint: z.string().default(""),
     customName: z.string().default("Custom System One"),
