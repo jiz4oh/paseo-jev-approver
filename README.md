@@ -37,7 +37,7 @@ paseo plugin ls
 paseo plugin logs jev-approver
 ```
 
-Ensure the **daemon process**, not merely your shell, receives `TYPESAFE_API_KEY`, and optional `JEV_APPROVER_TIMEOUT_MS`, `JEV_APPROVER_MODEL`. How to supply environment variables depends on how your daemon is launched. Restart/reload the daemon as needed. After inspecting real approval events, turn off **Dry Run** in Settings.
+Ensure the **daemon process**, not merely your shell, receives `TYPESAFE_API_KEY`, and optional Settings-managed timeout and model. How to supply environment variables depends on how your daemon is launched. Restart/reload the daemon as needed. After inspecting real approval events, turn off **Dry Run** in Settings.
 
 Plugins must be enabled under Settings -> Plugins. Enabling them changes the global daemon security posture; do so only after reviewing the code. Plugin server code is trusted and unsandboxed.
 
@@ -105,3 +105,9 @@ Jev docs: https://docs.typesafe.ai/
 ## Dry Run control
 
 The Settings **Dry Run** switch is the sole control for automatic approval. It defaults to enabled on a fresh installation. The legacy `JEV_APPROVER_DRY_RUN` environment variable is ignored. Turning Dry Run off permits the plugin to automatically approve only eligible low-risk permission requests; errors and unsupported operations still require human approval.
+
+## Runtime settings and status colors
+
+The provider model and API request timeout (1,000–15,000 ms, default 6,500 ms) are configured in **Settings → Plugins → Jev Approver**. Legacy `JEV_APPROVER_TIMEOUT_MS` and `JEV_APPROVER_MODEL` variables are ignored by the live review path. Provider key environment variables and XDG standard directory variables remain available.
+
+The Composer Jev icon is now status-aware: green when active, muted in dry run, amber when setup is missing or review failures occur. Its status is refreshed periodically while the composer is mounted. A green icon means the reviewer is configured for eligible pending permissions, not that every tool call is intercepted.
