@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile, unlink, chmod } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-export type ProviderId = "zen" | "typesafe" | "custom";
+export type ProviderId = "zen" | "typesafe" | "openrouter" | "vercel" | "custom";
 const dir = join(process.env.XDG_CONFIG_HOME || join(homedir(), ".config"), "paseo-jev-approver", "secrets");
 const secretFile = (provider: ProviderId) => join(dir, provider + ".key");
 
