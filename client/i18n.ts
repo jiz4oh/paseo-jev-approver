@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useSettings } from "@getpaseo/plugin/client";
+import { approverSettings } from "../shared/config";
 import en from "./locales/en.json";
 import zhCN from "./locales/zh-CN.json";
 
@@ -20,6 +22,7 @@ function hostLocale(): string {
   return typeof navigator !== "undefined" ? navigator.language : "en";
 }
 export function usePluginT() {
+  const settings = useSettings(approverSettings);
   const [locale, setLocale] = useState(hostLocale);
   useEffect(() => {
     if (typeof document === "undefined" || typeof MutationObserver === "undefined") return;
@@ -27,7 +30,9 @@ export function usePluginT() {
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
     return () => observer.disconnect();
   }, []);
-  return (key: Key) => translate(locale, key);
+  const preference = settings.status === "ready" ? settings.values.language : "auto";
+  const effectiveLocale = preference && preference !== "auto" ? preference : locale;
+  return (key: Key) => translate(effectiveLocale, key);
 }
 
 const outcomeKeys = ["active", "dry_run", "needs_setup", "degraded", "unknown", "approved", "rejected", "denied", "allowed", "blocked", "manual_review"] as const;

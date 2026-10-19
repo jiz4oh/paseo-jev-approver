@@ -77,5 +77,10 @@
   "denied": "denied",
   "allowed": "allowed",
   "blocked": "blocked",
-  "manual_review": "manual_review"
+  "manual_review": "manual_review",
+  "Interface language": "Interface language",
+  "Language": "Language",
+  "Automatic": "Automatic",
+  "English": "English",
+  "Simplified Chinese": "Simplified Chinese"
 }
