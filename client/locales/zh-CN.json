@@ -93,7 +93,6 @@
   "Stored key status": "已存储密钥状态",
   "Checking…": "检查中……",
   "Delete stored key": "删除已存储密钥",
-  "Key is saved to daemon when editing finishes.": "输入结束后将密钥保存到守护进程。",
   "Stored credentials are separate from environment variable keys.": "本地存储的密钥与环境变量中的密钥相互独立。",
   "Jev is ready for eligible pending permission requests.": "Jev 已就绪，可处理符合条件的待审批权限请求。",
   "Only permission requests surfaced by Paseo can be reviewed.": "Jev 只能审核 Paseo 提供的权限请求。",
@@ -104,5 +103,6 @@
   "Provider settings are incomplete or invalid.": "服务商配置不完整或无效。",
   "Open Settings and finish the provider configuration.": "请打开设置并完成服务商配置。",
   "Open Settings, enter the API key under Credentials, then reopen this panel.": "打开设置，在凭据中输入 API 密钥，然后重新打开此面板。",
-  "No API key is configured for": "尚未配置 API 密钥，服务商："
+  "No API key is configured for": "尚未配置 API 密钥，服务商：",
+  "Key is saved only when you click Save changes.": "仅在点击「保存修改」后才会将密钥写入守护进程。"
 }
