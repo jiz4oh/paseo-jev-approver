@@ -22,6 +22,22 @@ export function createReviewPopover(openSettings: () => void, openHistory: (agen
         .catch(() => { if (live) setError(true); });
       return () => { live = false; };
     }, [agentId]);
+    const translatedDetail = (value: string) => {
+      const missing = /^No API key is configured for (.+)\.$/.exec(value);
+      if (missing) return t("No API key is configured for") + " " + missing[1];
+      switch (value) {
+        case "Jev is ready for eligible pending permission requests.": return t("Jev is ready for eligible pending permission requests.");
+        case "Only permission requests surfaced by Paseo can be reviewed.": return t("Only permission requests surfaced by Paseo can be reviewed.");
+        case "Dry Run is enabled; the plugin evaluates but never approves.": return t("Dry Run is enabled; the plugin evaluates but never approves.");
+        case "Review decisions first. To allow auto-approval, disable Dry Run in Settings.": return t("Review decisions first. To allow auto-approval, disable Dry Run in Settings.");
+        case "A recent review failed; manual approvals remain available.": return t("A recent review failed; manual approvals remain available.");
+        case "Inspect Review history and plugin logs, then check your provider connection.": return t("Inspect Review history and plugin logs, then check your provider connection.");
+        case "Provider settings are incomplete or invalid.": return t("Provider settings are incomplete or invalid.");
+        case "Open Settings and finish the provider configuration.": return t("Open Settings and finish the provider configuration.");
+        case "Open Settings, enter the API key under Credentials, then reopen this panel.": return t("Open Settings, enter the API key under Credentials, then reopen this panel.");
+        default: return value;
+      }
+    };
     const colors = props.theme.colors;
     const statusColor = status?.status === "active" ? "#16a34a"
       : status?.status === "degraded" || status?.status === "needs_setup" ? "#d97706"
@@ -33,8 +49,8 @@ export function createReviewPopover(openSettings: () => void, openHistory: (agen
       </Text>
       {status && <>
         <Text style={{ color: colors.foregroundMuted }}>{status.provider} · {status.model}</Text>
-        <Text style={{ color: colors.foreground }}>{status.detail}</Text>
-        <Text style={{ color: colors.foregroundMuted }}>{status.nextStep}</Text>
+        <Text style={{ color: colors.foreground }}>{translatedDetail(status.detail)}</Text>
+        <Text style={{ color: colors.foregroundMuted }}>{translatedDetail(status.nextStep)}</Text>
         {status.status === "needs_setup" && <Pressable accessibilityRole="button"
           onPress={() => { props.close(); openSettings(); }}>
           <Text style={{ color: colors.accent || colors.foreground }}>{t("Configure API key →")}</Text>
