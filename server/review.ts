@@ -1,5 +1,5 @@
 /** Narrow, fail-closed review policy: it only auto-approves clear, bounded shell commands. */
-type Agent = { id: string; provider: string; cwd: string };
+type Agent = { id: string; provider: string; cwd: string };\nexport type ReviewConfig = { provider: "zen" | "typesafe" | "custom"; model: string; customEndpoint: string; apiKey?: string };
 type Permission = { id: string; kind: string; name: string; title?: string; description?: string; input?: unknown; detail?: unknown };
 type Decision = { action: "allow" | "ask"; reason: string; riskProbability?: number };
 
@@ -28,21 +28,29 @@ function extractShell(req: Permission): string | null {
   return command.trim().length > 0 && command.length <= MAX_COMMAND ? command : null;
 }
 
-export async function reviewPermission(agent: Agent, req: Permission): Promise<Decision> {
+export async function reviewPermission(agent: Agent, req: Permission, config?: ReviewConfig): Promise<Decision> {
   const command = extractShell(req);
   if (!command) return { action: "ask", reason: "unsupported_or_ambiguous_tool" };
   if (DENY_PATTERNS.some(pattern => pattern.test(command))) {
     return { action: "ask", reason: "local_risk_filter" };
   }
-  const key = process.env.TYPESAFE_API_KEY;
+  const key = config ? config.apiKey : process.env.TYPESAFE_API_KEY;
   if (!key) return { action: "ask", reason: "missing_api_key" };
   const timeoutMs = Math.max(1000, Math.min(15000, Number(process.env.JEV_APPROVER_TIMEOUT_MS || 6500) || 6500));
-  const response = await fetch(API_URL, {
+  const endpoint = config?.provider === "zen" ? "https://opencode.ai/zen/v1/systemone"
+    : config?.provider === "custom" ? config.customEndpoint : API_URL;
+  let url: URL;
+  try {
+    url = new URL(endpoint);
+    if (url.protocol !== "https:" || url.username || url.password) return { action: "ask", reason: "invalid_endpoint" };
+    if (config?.provider === "custom" && !url.pathname.endsWith("/systemone")) return { action: "ask", reason: "invalid_systemone_endpoint" };
+  } catch { return { action: "ask", reason: "invalid_endpoint" }; }
+  const response = await fetch(url, {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     signal: AbortSignal.timeout(timeoutMs),
     body: JSON.stringify({
-      model: process.env.JEV_APPROVER_MODEL || "jev-1.13.0",
+      model: config?.model || process.env.JEV_APPROVER_MODEL || "jev-1.13",
       state: {
         tool: req.name,
         command,
