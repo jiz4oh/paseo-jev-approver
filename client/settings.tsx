@@ -26,11 +26,10 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
   const [message, setMessage] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [hasKey, setHasKey] = useState<boolean | null>(null);
-  const [keyBusy, setKeyBusy] = useState(false);
   const saveKey = useRpc(saveCredential);
   const removeKey = useRpc(clearCredential);
   const keyStatus = useRpc(credentialStatus);
-  const modelDirty = !same(model, modelBase);
+  const modelDirty = !same(model, modelBase) || apiKey.length > 0;
   const policyDirty = !same(policy, policyBase);
   useEffect(() => {
     let mounted = true;
@@ -39,19 +38,6 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
       .catch(() => { if (mounted) setHasKey(null); });
     return () => { mounted = false; };
   }, [model.provider]);
-  async function commitKey() {
-    const value = apiKey.trim();
-    if (!value || keyBusy) return;
-    setKeyBusy(true);
-    try {
-      await saveKey({ provider: model.provider, apiKey: value });
-      setApiKey("");
-      setHasKey(true);
-      invalidateReviewStatus();
-      setMessage(t("Credential saved on daemon"));
-    } catch { setMessage(t("Credential save failed")); }
-    finally { setKeyBusy(false); }
-  }
   function fieldInput(label: string, value: string, onChange: (value: string) => void, placeholder?: string) {
     return <SettingsRow label={label}><TextInput value={value} onChangeText={onChange} placeholder={placeholder}
       accessibilityLabel={label} style={{ color: colors.foreground, backgroundColor: colors.control, padding: 10,
@@ -97,10 +83,22 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
     }
     const snapshot = model;
     const fields = { provider: snapshot.provider, model: snapshot.model.trim(), customEndpoint: snapshot.customEndpoint.trim(), timeoutMs, apiKeyEnv: snapshot.apiKeyEnv.trim() };
-    if (await persist(fields)) {
+    if (same(snapshot, modelBase) || await persist(fields)) {
       const saved = { ...snapshot, model: fields.model, customEndpoint: fields.customEndpoint, timeout: String(timeoutMs), apiKeyEnv: fields.apiKeyEnv };
       setModel(current => same(current, snapshot) ? saved : current);
       setModelBase(saved);
+      const secret = apiKey.trim();
+      if (secret) {
+        try {
+          await saveKey({ provider: snapshot.provider, apiKey: secret });
+          setApiKey(current => current === apiKey ? "" : current);
+          setHasKey(true);
+          invalidateReviewStatus();
+          setMessage(t("Saved"));
+        } catch {
+          setMessage(t("Credential save failed"));
+        }
+      }
     }
   }
   async function savePolicy() {
@@ -164,13 +162,14 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
         {fieldMarker(model.apiKeyEnv !== modelBase.apiKeyEnv, () => setModel(prev => ({ ...prev, apiKeyEnv: modelBase.apiKeyEnv })))}
       </SettingsCard></SettingsSection>
       <SettingsSection title={t("Credentials (daemon-side)")}><SettingsCard>
-        <SettingsRow label={t("API key")} hint={t("Key is saved to daemon when editing finishes.")}>
+        <SettingsRow label={t("API key")} hint={t("Key is saved only when you click Save changes.")}>
           <TextInput secureTextEntry value={apiKey} onChangeText={setApiKey}
-            onBlur={() => { void commitKey(); }}
+            
             placeholder={t("Paste key (not shown after saving)")}
             accessibilityLabel={t("API key")}
             style={{ color: colors.foreground, backgroundColor: colors.control, padding: 10, borderRadius: 8, minWidth: 180, borderColor: colors.border, borderWidth: 1 }}/>
         </SettingsRow>
+        {apiKey.length > 0 && fieldMarker(true, () => setApiKey(""))}
         <SettingsRow label={t("Stored key status")}>
           <Text style={{ color: colors.foregroundMuted }}>{hasKey === null ? t("Checking…") : hasKey ? t("Key configured") : t("No stored key")}</Text>
         </SettingsRow>
