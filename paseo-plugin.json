@@ -1,0 +1,5 @@
+{
+  "id": "jev-approver",
+  "description": "Conservative Jev-based automatic approval of Paseo shell permission requests",
+  "requirements": { "paseo": ">=0.8.0" }
+}
