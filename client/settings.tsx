@@ -2,11 +2,11 @@ import { useState } from "react";
 import { usePluginT } from "./i18n";
 import { Text, View, TextInput } from "react-native";
 import { useRpc, useSettings } from "@getpaseo/plugin/client";
-import { SettingsSection, SettingsCard, SettingsSelect, SettingsInput, SettingsSwitch, SettingsAction } from "@getpaseo/plugin/client/ui";
+import { SettingsSection, SettingsCard, SettingsSelect, SettingsInput, SettingsSwitch, SettingsAction, SettingsRow } from "@getpaseo/plugin/client/ui";
 import { approverSettings, credentialStatus, saveCredential, clearCredential } from "../shared/config";
 import { DEFAULT_REVIEW_PROMPT, DEFAULT_RISK_THRESHOLD } from "../shared/review-policy";
 
-function Editor({ state, onOpenHistory }: { state: any; onOpenHistory: () => void }) {
+function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: () => void; colors: { foreground: string; foregroundMuted: string; border: string; control: string } }) {
   const t = usePluginT();
   const [key, setKey] = useState("");
   const [message, setMessage] = useState("");
@@ -25,7 +25,7 @@ function Editor({ state, onOpenHistory }: { state: any; onOpenHistory: () => voi
     const ok = await state.save({ ...state.values, ...fields }, state.revision);
     setMessage(ok ? t("Saved") : t("Save failed; reload and retry"));
   }
-  return <View>
+  return <View style={{ gap: 20, paddingBottom: 24 }}>
     <SettingsSection title={t("Review history")}>
       <SettingsCard>
         <SettingsAction label={t("Approval records")} actionLabel={t("View history")} onPress={onOpenHistory}/>
@@ -59,11 +59,12 @@ function Editor({ state, onOpenHistory }: { state: any; onOpenHistory: () => voi
           }
           void persist({ riskThreshold: n / 100 });
         }}/>
-        <Text>{t("Review prompt (20–8000 characters)")}</Text>
+        <SettingsRow label={t("Review prompt (20–8000 characters)")}>
         <TextInput multiline numberOfLines={6} value={reviewPrompt}
           onChangeText={setReviewPrompt} accessibilityLabel={t("Review prompt")}
           placeholder={t("Describe what Jev should consider risky...")}
-          style={{ minHeight: 120, textAlignVertical: "top", padding: 12, borderWidth: 1, borderColor: "#999", borderRadius: 8 }} />
+          style={{ minHeight: 120, width: "100%", color: colors.foreground, backgroundColor: colors.control, textAlignVertical: "top", padding: 12, borderWidth: 1, borderColor: colors.border, borderRadius: 10 }} />
+        </SettingsRow>
         <SettingsAction label={t("Review prompt")} actionLabel={t("Save prompt")} onPress={() => {
           const prompt = reviewPrompt.trim();
           if (prompt.length < 20 || prompt.length > 8000) {
@@ -77,7 +78,7 @@ function Editor({ state, onOpenHistory }: { state: any; onOpenHistory: () => voi
           void persist({ riskThreshold: DEFAULT_RISK_THRESHOLD, reviewPrompt: DEFAULT_REVIEW_PROMPT });
         }}/>
       </SettingsCard>
-      <Text>{t("Local safety filters and mandatory safety instructions always remain enabled. Risk scores are model estimates, not calibrated real-world probabilities.")}</Text>
+      <Text style={{ color: colors.foregroundMuted, fontSize: 12, lineHeight: 18, marginTop: 8 }}>{t("Local safety filters and mandatory safety instructions always remain enabled. Risk scores are model estimates, not calibrated real-world probabilities.")}</Text>
     </SettingsSection>
     <SettingsSection title={t("Credentials (daemon-side)")}>
       <SettingsCard>
@@ -98,14 +99,14 @@ function Editor({ state, onOpenHistory }: { state: any; onOpenHistory: () => voi
         <SettingsAction label={t("Environment")} actionLabel={t("Save variable name")} onPress={() => void persist({ apiKeyEnv: env })}/>
       </SettingsCard>
     </SettingsSection>
-    <Text>{hasKey === null ? "" : hasKey ? t("Key configured") : t("No stored key")}</Text>
-    <Text>{message || String(state.saveError ?? "") || ""}</Text>
+    {hasKey !== null && <Text style={{ color: colors.foregroundMuted }}>{hasKey ? t("Key configured") : t("No stored key")}</Text>}
+    {!!(message || state.saveError) && <Text accessibilityRole="alert" style={{ color: colors.foreground }}>{message || String(state.saveError)}</Text>}
   </View>;
 }
 
-export function ApproverSettings({ onOpenHistory }: { onOpenHistory: () => void }) {
+export function ApproverSettings({ onOpenHistory, theme }: { onOpenHistory: () => void; theme: { colors: { foreground: string; foregroundMuted: string; border: string; control: string } } }) {
   const state = useSettings(approverSettings);
   const t = usePluginT();
   if (state.status !== "ready") return <Text>{t("Settings:")} {state.status}. {t("Reload or reset if invalid.")}</Text>;
-  return <Editor key={state.values.provider} state={state} onOpenHistory={onOpenHistory}/>;
+  return <Editor key={state.values.provider} state={state} onOpenHistory={onOpenHistory} colors={theme.colors}/>;
 }
