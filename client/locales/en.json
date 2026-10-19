@@ -94,5 +94,15 @@
   "Checking…": "Checking…",
   "Delete stored key": "Delete stored key",
   "Key is saved to daemon when editing finishes.": "Key is saved to daemon when editing finishes.",
-  "Stored credentials are separate from environment variable keys.": "Stored credentials are separate from environment variable keys."
+  "Stored credentials are separate from environment variable keys.": "Stored credentials are separate from environment variable keys.",
+  "Jev is ready for eligible pending permission requests.": "Jev is ready for eligible pending permission requests.",
+  "Only permission requests surfaced by Paseo can be reviewed.": "Only permission requests surfaced by Paseo can be reviewed.",
+  "Dry Run is enabled; the plugin evaluates but never approves.": "Dry Run is enabled; the plugin evaluates but never approves.",
+  "Review decisions first. To allow auto-approval, disable Dry Run in Settings.": "Review decisions first. To allow auto-approval, disable Dry Run in Settings.",
+  "A recent review failed; manual approvals remain available.": "A recent review failed; manual approvals remain available.",
+  "Inspect Review history and plugin logs, then check your provider connection.": "Inspect Review history and plugin logs, then check your provider connection.",
+  "Provider settings are incomplete or invalid.": "Provider settings are incomplete or invalid.",
+  "Open Settings and finish the provider configuration.": "Open Settings and finish the provider configuration.",
+  "Open Settings, enter the API key under Credentials, then reopen this panel.": "Open Settings, enter the API key under Credentials, then reopen this panel.",
+  "No API key is configured for": "No API key is configured for"
 }
