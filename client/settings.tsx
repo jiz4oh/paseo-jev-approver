@@ -3,6 +3,7 @@ import { Text, View, TextInput, Pressable, ScrollView } from "react-native";
 import { useRpc, useSettings } from "@getpaseo/plugin/client";
 import { SettingsSection, SettingsCard, SettingsSelect, SettingsSwitch, SettingsAction, SettingsRow } from "@getpaseo/plugin/client/ui";
 import { usePluginT } from "./i18n";
+import { invalidateReviewStatus } from "./status-sync";
 import { approverSettings, credentialStatus, saveCredential, clearCredential } from "../shared/config";
 import { DEFAULT_REVIEW_PROMPT, DEFAULT_RISK_THRESHOLD } from "../shared/review-policy";
 
@@ -46,6 +47,7 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
       await saveKey({ provider: model.provider, apiKey: value });
       setApiKey("");
       setHasKey(true);
+      invalidateReviewStatus();
       setMessage(t("Credential saved on daemon"));
     } catch { setMessage(t("Credential save failed")); }
     finally { setKeyBusy(false); }
@@ -73,6 +75,7 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
       // Only the active tab's fields are patched into the latest persisted values.
       // Drafts from other tabs are never included in this write.
       const ok = await state.save({ ...state.values, ...fields }, state.revision);
+      if (ok) invalidateReviewStatus();
       setMessage(ok ? t("Saved") : t("Save failed; reload and retry"));
       return ok;
     } catch {
@@ -172,7 +175,7 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
           <Text style={{ color: colors.foregroundMuted }}>{hasKey === null ? t("Checking…") : hasKey ? t("Key configured") : t("No stored key")}</Text>
         </SettingsRow>
         {hasKey === true && <SettingsAction label={t("Remove credential")} actionLabel={t("Delete stored key")}
-          onPress={() => { void removeKey({ provider: model.provider }).then(() => { setHasKey(false); setMessage(t("Credential removed")); }).catch(() => setMessage(t("Delete failed"))); }}/>}
+          onPress={() => { void removeKey({ provider: model.provider }).then(() => { setHasKey(false); invalidateReviewStatus(); setMessage(t("Credential removed")); }).catch(() => setMessage(t("Delete failed"))); }}/>}
       </SettingsCard></SettingsSection>
       <Text style={{ color: colors.foregroundMuted, fontSize: 12 }}>{t("Stored credentials are separate from environment variable keys.")}</Text>
     </>}
