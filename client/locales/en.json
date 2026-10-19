@@ -87,5 +87,12 @@
   "Complete required model fields": "Complete required model fields",
   "Unsaved changes": "Unsaved changes — save this tab before leaving",
   "Saving…": "Saving…",
-  "Save changes": "Save changes"
+  "Save changes": "Save changes",
+  "Modified": "Modified",
+  "Undo": "Undo",
+  "Stored key status": "Stored key status",
+  "Checking…": "Checking…",
+  "Delete stored key": "Delete stored key",
+  "Key is saved to daemon when editing finishes.": "Key is saved to daemon when editing finishes.",
+  "Stored credentials are separate from environment variable keys.": "Stored credentials are separate from environment variable keys."
 }
