@@ -58,11 +58,11 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
     </SettingsSection>
     <SettingsSection title={t("Review policy")}>
       <SettingsCard>
-        <SettingsInput label={t("Maximum risk (%) · 0–10")} initialValue={riskPercent} onChangeText={setRiskPercent} placeholder="1" />
+        <SettingsInput label={t("Maximum risk (%) · 0–100")} initialValue={riskPercent} onChangeText={setRiskPercent} placeholder="1" />
         <SettingsAction label={t("Risk threshold")} actionLabel={t("Save threshold")} onPress={() => {
           const n = Number(riskPercent);
-          if (!Number.isFinite(n) || n < 0 || n > 10 || riskPercent.trim() === "") {
-            setMessage(t("Risk threshold must be between 0% and 10%")); return;
+          if (!Number.isFinite(n) || n < 0 || n > 100 || riskPercent.trim() === "") {
+            setMessage(t("Risk threshold must be between 0% and 100%")); return;
           }
           void persist({ riskThreshold: n / 100 });
         }}/>
