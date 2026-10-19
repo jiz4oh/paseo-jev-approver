@@ -22,7 +22,9 @@ export default function contribute(server: PluginServerContext) {
       const apiKey = (env ? process.env[env] : undefined)
         || await getApiKey(cfg.provider)
         || (cfg.provider === "zen" ? process.env.OPENCODE_API_KEY : undefined)
-        || (cfg.provider === "typesafe" ? process.env.TYPESAFE_API_KEY : undefined);
+        || (cfg.provider === "typesafe" ? process.env.TYPESAFE_API_KEY : undefined)
+        || (cfg.provider === "openrouter" ? process.env.OPENROUTER_API_KEY : undefined)
+        || (cfg.provider === "vercel" ? process.env.AI_GATEWAY_API_KEY : undefined);
       const decision = await reviewPermission(event.agent, event.request, { ...cfg, apiKey });
       console.info(JSON.stringify({ component: "paseo-jev-approver", agent: event.agent.id,
         request: event.request.id, action: decision.action, reason: decision.reason,
