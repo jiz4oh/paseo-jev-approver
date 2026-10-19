@@ -4,6 +4,7 @@ import { Text, View, Pressable } from "react-native";
 import { useRpc } from "@getpaseo/plugin/client";
 import type { PluginButtonContentProps } from "@getpaseo/plugin/client";
 import { getReviewStatus, listReviews } from "../shared/review-rpc";
+import { statusEpoch, subscribeReviewStatus } from "./status-sync";
 import type { AuditEntry } from "../shared/review-rpc";
 
 export function createReviewPopover(openSettings: () => void, openHistory: (agentId: string) => void) {
@@ -17,11 +18,23 @@ export function createReviewPopover(openSettings: () => void, openHistory: (agen
     const agentId = props.context === "agent" ? props.agentId : undefined;
     useEffect(() => {
       let live = true;
-      Promise.all([statusRpc({}), reviewsRpc({ agentId, limit: 3, offset: 0 })])
-        .then(([s,r]) => { if (live) { setStatus(s); setEntries(r.entries); } })
+      let sequence = 0;
+      const refresh = () => {
+        const request = ++sequence;
+        const epoch = statusEpoch();
+        void statusRpc({}).then(s => {
+          if (live && request === sequence && epoch === statusEpoch()) { setStatus(s); setError(false); }
+        }).catch(() => {
+          if (live && request === sequence && epoch === statusEpoch()) setError(true);
+        });
+      };
+      refresh();
+      const unsubscribe = subscribeReviewStatus(refresh);
+      void reviewsRpc({ agentId, limit: 3, offset: 0 })
+        .then(r => { if (live) setEntries(r.entries); })
         .catch(() => { if (live) setError(true); });
-      return () => { live = false; };
-    }, [agentId]);
+      return () => { live = false; ++sequence; unsubscribe(); };
+    }, [agentId, statusRpc, reviewsRpc]);
     const translatedDetail = (value: string) => {
       const missing = /^No API key is configured for (.+)\.$/.exec(value);
       if (missing) return t("No API key is configured for") + " " + missing[1];
@@ -40,7 +53,7 @@ export function createReviewPopover(openSettings: () => void, openHistory: (agen
     };
     const colors = props.theme.colors;
     const statusColor = status?.status === "active" ? "#16a34a"
-      : status?.status === "degraded" || status?.status === "needs_setup" ? "#d97706"
+      : status?.status === "degraded" || status?.status === "needs_setup" || status?.status === "dry_run" ? "#d97706"
       : colors.foregroundMuted;
     return <View style={{ gap: 12, padding: 8, minWidth: 260 }}>
       <Text style={{ fontWeight: "600", color: colors.foreground }}>{t("Jev Approver")}</Text>

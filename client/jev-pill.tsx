@@ -5,24 +5,31 @@ import { useRpc } from "@getpaseo/plugin/client";
 import type { PluginButtonIconProps } from "@getpaseo/plugin/client";
 import { getReviewStatus } from "../shared/review-rpc";
 import { createReviewPopover } from "./review-popover";
+import { statusEpoch, subscribeReviewStatus } from "./status-sync";
 
 
 function JevStatusIcon(props: PluginButtonIconProps) {
   const getStatus = useRpc(getReviewStatus);
   const [status, setStatus] = useState<"active" | "dry_run" | "needs_setup" | "degraded" | "unknown">("unknown");
   useEffect(() => {
-    let active = true;
-    const update = () => {
+    let mounted = true;
+    let sequence = 0;
+    const refresh = () => {
+      const request = ++sequence;
+      const epoch = statusEpoch();
       void getStatus({}).then(result => {
-        if (active) setStatus(result.status);
-      }).catch(() => { if (active) setStatus("degraded"); });
+        if (mounted && request === sequence && epoch === statusEpoch()) setStatus(result.status);
+      }).catch(() => {
+        if (mounted && request === sequence && epoch === statusEpoch()) setStatus("unknown");
+      });
     };
-    update();
-    const timer = setInterval(update, 15000);
-    return () => { active = false; clearInterval(timer); };
+    refresh();
+    const unsubscribe = subscribeReviewStatus(refresh);
+    const timer = setInterval(refresh, 15000);
+    return () => { mounted = false; ++sequence; unsubscribe(); clearInterval(timer); };
   }, [getStatus]);
   const color = status === "active" ? "#16a34a"
-    : status === "degraded" || status === "needs_setup" ? "#d97706"
+    : status === "degraded" || status === "needs_setup" || status === "dry_run" ? "#d97706"
     : props.color;
   // U+26E8 is often drawn as a colored emoji and ignores Text.color.
   // Use primitive RN views for a consistently tintable monochrome icon.
