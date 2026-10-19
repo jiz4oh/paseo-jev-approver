@@ -4,6 +4,20 @@ A **server-only** Paseo plugin. It reviews a narrow class of shell permission re
 
 ## Installation
 
+## Install directly from GitHub
+
+On the **Paseo daemon machine**, use the built-in Git source installer:
+
+```bash
+paseo --version
+paseo plugin install github:jiz4oh/paseo-jev-approver
+paseo plugin ls jev-approver
+paseo plugin logs jev-approver
+```
+
+A first install may fail at dependency preparation or TypeScript compilation while the integration is still experimental. For development, clone the repository, use `paseo plugin init` to generate a plugin scaffold compatible with your installed Paseo, and reconcile its generated `package.json` and `tsconfig.json` with this source. Do not turn on automatic approval until the daemon loads the plugin and you've verified real permission payloads in dry-run mode.
+
+
 The repository contains the source files, but deliberately **no guessed SDK dependency versions**. On the target Paseo daemon host:
 
 ```bash
