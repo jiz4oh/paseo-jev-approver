@@ -77,5 +77,10 @@
   "denied": "已拒绝",
   "allowed": "已允许",
   "blocked": "已拦截",
-  "manual_review": "人工审核"
+  "manual_review": "人工审核",
+  "Interface language": "界面语言",
+  "Language": "语言",
+  "Automatic": "自动检测",
+  "English": "英语",
+  "Simplified Chinese": "简体中文"
 }
