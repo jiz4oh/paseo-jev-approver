@@ -38,6 +38,20 @@ Plugins must be enabled under Settings -> Plugins. Enabling them changes the glo
 * Does not enforce policy on commands the agent/provider allows without asking first. Set your underlying OpenCode/Codex permissions to **ask** for operations you wish reviewed.
 * Never auto-denies: local pattern matches leave requests for a human to inspect.
 
+
+## Development and CI
+
+The repository runs **offline/mock unit tests** for the Jev permission decision logic; no real TypeSafe API key or Paseo daemon is needed:
+
+```bash
+npm install
+npm run check
+```
+
+GitHub Actions runs the same check on pushes to `main` and on pull requests. Tests cover unsupported/malformed requests, local risk filters, missing API key, risk score thresholds, invalid responses, API HTTP errors, and network failures.
+
+**Current CI scope:** `tsconfig.json` intentionally checks `server/review.ts` and `tests/*.test.ts` only. It does **not** compile or execute `index.server.ts`, because that requires the matching Paseo plugin SDK from a generated scaffold. Do not interpret a green CI badge as proven Paseo daemon compatibility. End-to-end tests with real provider permission events and a dry-run review are required before enabling auto-approve.
+
 ## Security limits
 
 This is a conservative **prototype**, not a security boundary. A model-derived probability is not a guarantee of safety. Shell parsing is intentionally restrictive rather than comprehensive. The source is not verified against your local Paseo SDK or provider-specific permission payloads. Run in dry-run and inspect emitted events before enabling approvals.
