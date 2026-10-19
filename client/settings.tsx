@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Text, View, TextInput, Pressable, ScrollView } from "react-native";
 import { useRpc, useSettings } from "@getpaseo/plugin/client";
-import { SettingsSection, SettingsCard, SettingsSelect, SettingsInput, SettingsSwitch, SettingsAction, SettingsRow } from "@getpaseo/plugin/client/ui";
+import { SettingsSection, SettingsCard, SettingsSelect, SettingsSwitch, SettingsAction, SettingsRow } from "@getpaseo/plugin/client/ui";
 import { usePluginT } from "./i18n";
 import { approverSettings, credentialStatus, saveCredential, clearCredential } from "../shared/config";
 import { DEFAULT_REVIEW_PROMPT, DEFAULT_RISK_THRESHOLD } from "../shared/review-policy";
@@ -49,6 +49,11 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
       setMessage(t("Credential saved on daemon"));
     } catch { setMessage(t("Credential save failed")); }
     finally { setKeyBusy(false); }
+  }
+  function fieldInput(label: string, value: string, onChange: (value: string) => void, placeholder?: string) {
+    return <SettingsRow label={label}><TextInput value={value} onChangeText={onChange} placeholder={placeholder}
+      accessibilityLabel={label} style={{ color: colors.foreground, backgroundColor: colors.control, padding: 10,
+      borderRadius: 8, minWidth: 155, borderColor: colors.border, borderWidth: 1 }}/></SettingsRow>;
   }
   function fieldMarker(changed: boolean, reset: () => void) {
     if (!changed) return null;
@@ -146,22 +151,19 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
           options={[{ label:t("OpenCode Zen (default)"), value:"zen" },{ label:t("TypeSafe AI"),value:"typesafe" },{ label:t("OpenRouter"),value:"openrouter" },{ label:t("Vercel AI Gateway"),value:"vercel" },{ label:t("Custom System One"),value:"custom" }]}
           onValueChange={provider => setModel(prev => ({ ...prev, provider, model: suggestedModel(provider) }))}/>
         {fieldMarker(model.provider !== modelBase.provider, () => setModel(prev => ({ ...prev, provider: modelBase.provider })))}
-        <SettingsInput label={t("Model ID")} initialValue={model.model} onChangeText={value => setModel(prev => ({ ...prev, model: value }))} placeholder="jev-1.13-free"/>
+        {fieldInput(t("Model ID"), model.model, value => setModel(prev => ({ ...prev, model: value })), "jev-1.13-free")}
         {fieldMarker(model.model !== modelBase.model, () => setModel(prev => ({ ...prev, model: modelBase.model })))}
-        {model.provider === "custom" && <SettingsInput label={t("System One endpoint URL (HTTPS)")}
-          initialValue={model.customEndpoint} onChangeText={value => setModel(prev => ({ ...prev, customEndpoint: value }))} placeholder="https://example.com/v1/systemone"/>}
+        {model.provider === "custom" && fieldInput(t("System One endpoint URL (HTTPS)"), model.customEndpoint, value => setModel(prev => ({ ...prev, customEndpoint: value })), "https://example.com/v1/systemone")}}
         {model.provider === "custom" && {fieldMarker(model.customEndpoint !== modelBase.customEndpoint, () => setModel(prev => ({ ...prev, customEndpoint: modelBase.customEndpoint })))}}
-        <SettingsInput label={t("Request timeout (milliseconds, 1000–15000)")}
-          initialValue={model.timeout} onChangeText={value => setModel(prev => ({ ...prev, timeout: value }))} placeholder="6500"/>
+        {fieldInput(t("Request timeout (milliseconds, 1000–15000)"), model.timeout, value => setModel(prev => ({ ...prev, timeout: value })), "6500")}
         {fieldMarker(model.timeout !== modelBase.timeout, () => setModel(prev => ({ ...prev, timeout: modelBase.timeout })))}
-        <SettingsInput label={t("Alternative: API key environment variable name")}
-          initialValue={model.apiKeyEnv} onChangeText={value => setModel(prev => ({ ...prev, apiKeyEnv: value }))} placeholder="OPENCODE_API_KEY"/>
+        {fieldInput(t("Alternative: API key environment variable name"), model.apiKeyEnv, value => setModel(prev => ({ ...prev, apiKeyEnv: value })), "OPENCODE_API_KEY")}
         {fieldMarker(model.apiKeyEnv !== modelBase.apiKeyEnv, () => setModel(prev => ({ ...prev, apiKeyEnv: modelBase.apiKeyEnv })))}
       </SettingsCard></SettingsSection>
       <SettingsSection title={t("Credentials (daemon-side)")}><SettingsCard>
         <SettingsRow label={t("API key")} hint={t("Key is saved to daemon when editing finishes.")}>
           <TextInput secureTextEntry value={apiKey} onChangeText={setApiKey}
-            onBlur={() => { void commitKey(); }} onSubmitEditing={() => { void commitKey(); }}
+            onBlur={() => { void commitKey(); }}
             placeholder={t("Paste key (not shown after saving)")}
             accessibilityLabel={t("API key")}
             style={{ color: colors.foreground, backgroundColor: colors.control, padding: 10, borderRadius: 8, minWidth: 180, borderColor: colors.border, borderWidth: 1 }}/>
@@ -176,8 +178,7 @@ function Editor({ state, onOpenHistory, colors }: { state: any; onOpenHistory: (
     </>}
     {tab === "policy" && <>
       <SettingsSection title={t("Review policy")}><SettingsCard>
-        <SettingsInput label={t("Maximum risk (%) · 0–100")} initialValue={policy.riskPercent}
-          onChangeText={value => setPolicy(prev => ({ ...prev, riskPercent: value }))} placeholder="1"/>
+        {fieldInput(t("Maximum risk (%) · 0–100"), policy.riskPercent, value => setPolicy(prev => ({ ...prev, riskPercent: value })), "1")}
         {fieldMarker(policy.riskPercent !== policyBase.riskPercent, () => setPolicy(prev => ({ ...prev, riskPercent: policyBase.riskPercent })))}
       </SettingsCard></SettingsSection>
       <Text style={{ color: colors.foreground }}>{t("Review prompt (20–8000 characters)")}</Text>
