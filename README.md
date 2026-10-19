@@ -53,6 +53,16 @@ Plugins must be enabled under Settings -> Plugins. Enabling them changes the glo
 * Never auto-denies: local pattern matches leave requests for a human to inspect.
 
 
+## Jev Composer status and review history
+
+The plugin registers a small **Jev** pill beside each agent's composer using the supported Paseo `addComposerPill` API. Pressing the pill opens a native desktop popover or compact mobile sheet showing the configured provider/model, runtime status and the three most recent decisions for that agent. **Settings** opens the existing Jev Approver settings page. **View all history** opens a paged native plugin screen.
+
+The daemon persists up to 1,000 audit entries in `${XDG_STATE_HOME:-~/.local/state}/paseo-jev-approver/reviews.json`, with no raw shell commands, API keys or request payloads. Each record contains agent/request IDs, a tool name, decision reason and probability when available, and its tracked approval outcome. The history screen is filtered to the selected agent. On a successful auto-approval call the record changes to `approved`; Paseo permission-resolution events can update it to `resolved_allow` or `resolved_deny`. `pending` means the plugin left the request for human approval, not that the user denied it.
+
+The status tag is **not** an approval-mode switch: it does not change Paseo's Default/Auto Accept controls. `active` means configuration appears ready (not that every tool is intercepted or that the provider is confirmed online). `degraded` reflects a recent recorded review failure. Settings remain daemon-scoped, and UI review data is loaded via plugin RPC.
+
+**Integration status:** The client and server registration files are not covered by the current CI TypeScript project and have not yet been exercised in a real Paseo daemon. Verify installation, navigation, RPC, popover rendering and real permission events with Dry-run enabled before production use.
+
 ## Provider configuration
 
 Open **Settings → Plugins → Jev Approver** in a Paseo client connected to the target daemon.
