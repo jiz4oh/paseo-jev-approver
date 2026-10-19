@@ -23,8 +23,8 @@ function Editor({ state }: { state: any }) {
     <SettingsSection title="Jev provider">
       <SettingsCard>
         <SettingsSelect label="Provider" value={provider}
-          options={[{label:"OpenCode Zen (default)",value:"zen"},{label:"TypeSafe AI",value:"typesafe"},{label:"Custom System One",value:"custom"}]}
-          onValueChange={(value) => { void persist({ provider: value as typeof provider, model: value === "zen" ? "jev-1.13-free" : "jev-1.13" }); setHasKey(null); setModel(value === "zen" ? "jev-1.13-free" : "jev-1.13"); }}/>
+          options={[{label:"OpenCode Zen (default)",value:"zen"},{label:"TypeSafe AI",value:"typesafe"},{label:"OpenRouter",value:"openrouter"},{label:"Vercel AI Gateway",value:"vercel"},{label:"Custom System One",value:"custom"}]}
+          onValueChange={(value) => { void persist({ provider: value as typeof provider, model: value === "zen" ? "jev-1.13-free" : value === "openrouter" ? "jev-1.13" : value === "vercel" ? "typesafe-ai/jev" : "jev-1.13" }); setHasKey(null); setModel(value === "zen" ? "jev-1.13-free" : "jev-1.13"); }}/>
         <SettingsInput label="Model ID" initialValue={model} onChangeText={setModel} placeholder="jev-1.13-free" />
         <SettingsAction label="Model" actionLabel="Save model" onPress={() => void persist({ model })} />
         {provider === "custom" ? <>
