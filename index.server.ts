@@ -35,7 +35,7 @@ export default function contribute(server: PluginServerContext) {
       : "Jev is ready for eligible pending permission requests.";
     const nextStep = invalidConfig
       ? "Open Settings and finish the provider configuration."
-      : !key ? "Open Settings, enter the API key under Credentials, and press Save key. Then reopen this panel."
+      : !key ? "Open Settings, enter the API key under Credentials, then reopen this panel."
       : recent ? "Inspect Review history and plugin logs, then check your provider connection."
       : dryRun ? "Review decisions first. To allow auto-approval, disable Dry Run in Settings."
       : "Only permission requests surfaced by Paseo can be reviewed.";
